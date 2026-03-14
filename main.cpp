@@ -1,12 +1,12 @@
 #include <iostream>
-#include <vector>
+#include <set>
 
 struct position {
   int x, y;
 };
 
-bool operator!=(const position &pos1, const position &pos2) {
-  if (pos1.x != pos2.x || pos1.y != pos2.y)
+bool operator==(const position &pos1, const position &pos2) {
+  if (pos1.x == pos2.x && pos1.y == pos2.y)
     return true;
   return false;
 }
@@ -20,15 +20,16 @@ struct wall {
 };
 
 class boardState {
+public:
   position redRobot;
   position greenRobot;
   position blueRobot;
   position yellowRobot;
 
-  std::vector<wall> walls;
+  std::set<wall> walls;
 
   boardState(position red, position green, position blue, position yellow,
-             std::vector<wall> walls) {
+             std::set<wall> walls) {
     redRobot = red;
     greenRobot = green;
     blueRobot = blue;
@@ -37,7 +38,32 @@ class boardState {
   }
 };
 
-void moveRedLeft(boardState state) {}
+void moveRedLeft(boardState state) {
+  while (true) {
+    position nextPos = {state.redRobot.x - 1, state.redRobot.y};
+    bool canMove = true;
+    bool lastMove = false;
+
+    for (auto wall : state.walls) {
+      if (wall.pos == nextPos) {
+        if (wall.right) {
+          canMove = false;
+          break;
+        } else {
+          lastMove = true;
+          break;
+        }
+      }
+    }
+
+    if (canMove) {
+      state.redRobot = nextPos;
+      if (lastMove)
+        return;
+    } else
+      return;
+  }
+}
 void moveRedRight(boardState state) {}
 void moveRedUp(boardState state) {}
 void moveRedDown(boardState state) {}
