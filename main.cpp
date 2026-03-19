@@ -10,7 +10,7 @@ int main() {
 
   while (window.isOpen()) {
     // Verifica todos os eventos (ex: rato, teclado, clicar no X da janela)
-    while (const auto event = window.pollEvent()) {
+    while (auto event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>())
         window.close();
     }

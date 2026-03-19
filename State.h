@@ -7,13 +7,14 @@
 class State {
 private:
   Board board;
-  Robot red;
-  Robot green;
-  Robot blue;
-  Robot yellow;
+  Robot redRobot;
+  Robot greenRobot;
+  Robot blueRobot;
+  Robot yellowRobot;
 
 public:
-  State(Board board, Robot red, Robot green, Robot blue, Robot yellow);
+  State(Board board, Robot redRobot, Robot greenRobot, Robot blueRobot,
+        Robot yellowRobot);
   Board getBoard();
   Robot getRedRobot();
   Robot getGreenRobot();

@@ -5,6 +5,11 @@ Board::Board(int width, int height) {
   this->height = height;
 }
 
+Board::Board() {
+  this->width = 16;
+  this->height = 16;
+}
+
 void Board::addWall(int x, int y, bool up, bool down, bool left, bool right) {
   Wall w;
   w.pos = {x, y};
@@ -80,3 +85,5 @@ void Board::drawBoard(sf::RenderWindow &window) const {
     }
   }
 }
+
+std::vector<Wall> Board::getWalls() { return this->walls; }

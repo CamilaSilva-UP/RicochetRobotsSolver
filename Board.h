@@ -21,6 +21,7 @@ private:
   std::vector<Wall> walls;
 
 public:
+  Board();
   Board(int width, int height);
 
   void addWall(int x, int y, bool up, bool down, bool left, bool right);
