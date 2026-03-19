@@ -1,5 +1,4 @@
 #include "Board.h"
-#include <iostream>
 
 Board::Board(int width, int height) {
   this->width = width;
@@ -33,21 +32,51 @@ bool Board::isInside(int x, int y) const {
 //     return false;
 // }
 
-void Board::drawBoard() const {
+void Board::drawBoard(sf::RenderWindow &window) const {
+  float cellSize = 60.0f;
+  float offset = 20.0f;
+
+  // 1. Desenhar as células (grelha de fundo)
   for (int y = 0; y < height; ++y) {
     for (int x = 0; x < width; ++x) {
-      bool hasWallHere = false;
-      for (auto &w : walls) {
-        if (w.pos.x == x && w.pos.y == y) {
-          hasWallHere = true;
-          break;
-        }
-      }
-      if (hasWallHere)
-        std::cout << "# ";
-      else
-        std::cout << ". ";
+      sf::RectangleShape cell(sf::Vector2f(cellSize, cellSize));
+      cell.setPosition({offset + x * cellSize, offset + y * cellSize});
+      cell.setFillColor(sf::Color(220, 220, 220)); // Cinzento claro
+      cell.setOutlineThickness(1.0f);
+      cell.setOutlineColor(sf::Color(180, 180, 180)); // Linhas da grelha
+      window.draw(cell);
     }
-    std::cout << "\n";
+  }
+
+  // 2. Desenhar as paredes do Ricochet Robots
+  float wallThickness = 6.0f; // Grossura da parede
+
+  for (const auto &w : walls) {
+    float px = offset + w.pos.x * cellSize;
+    float py = offset + w.pos.y * cellSize;
+
+    sf::RectangleShape wallShape;
+    wallShape.setFillColor(sf::Color::Black); // Cor da parede
+
+    if (w.up) {
+      wallShape.setSize(sf::Vector2f(cellSize, wallThickness));
+      wallShape.setPosition({px, py - wallThickness / 2});
+      window.draw(wallShape);
+    }
+    if (w.down) {
+      wallShape.setSize(sf::Vector2f(cellSize, wallThickness));
+      wallShape.setPosition({px, py + cellSize - wallThickness / 2});
+      window.draw(wallShape);
+    }
+    if (w.left) {
+      wallShape.setSize(sf::Vector2f(wallThickness, cellSize));
+      wallShape.setPosition({px - wallThickness / 2, py});
+      window.draw(wallShape);
+    }
+    if (w.right) {
+      wallShape.setSize(sf::Vector2f(wallThickness, cellSize));
+      wallShape.setPosition({px + cellSize - wallThickness / 2, py});
+      window.draw(wallShape);
+    }
   }
 }

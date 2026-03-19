@@ -2,6 +2,7 @@
 #define BOARD_H
 
 #include "Utils.h"
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
 
@@ -31,7 +32,7 @@ public:
   //
   // hasWall(int x, int y, int dx, int dy) const;
 
-  void drawBoard() const;
+  void drawBoard(sf::RenderWindow &window) const;
 
   std::vector<Wall> getWalls();
 };
