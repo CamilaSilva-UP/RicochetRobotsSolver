@@ -4,6 +4,7 @@
 #include "Utils.h"
 #include <iostream>
 #include <vector>
+#include <SFML/Graphics.hpp>
 
 struct Wall {
   Position pos;
@@ -28,7 +29,7 @@ public:
 
   bool hasWall(int x, int y, int dx, int dy) const;
 
-  void drawBoard() const;
+  void drawBoard(sf::RenderWindow& window) const;
 
   std::vector<Wall> getWalls();
 };
