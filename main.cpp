@@ -1,6 +1,6 @@
+#include "Board.h"
 #include <iostream>
 #include <set>
-#include "Board.h"
 
 struct position {
   int x, y;
@@ -42,27 +42,15 @@ public:
 void moveRedLeft(boardState state) {
   while (true) {
     position nextPos = {state.redRobot.x - 1, state.redRobot.y};
-    bool canMove = true;
-    bool lastMove = false;
-
     for (auto wall : state.walls) {
-      if (wall.pos == nextPos) {
-        if (wall.right) {
-          canMove = false;
-          break;
-        } else {
-          lastMove = true;
-          break;
-        }
+      if (wall.pos == nextPos && wall.right) {
+        return;
+      } else if (wall.pos == nextPos && wall.left) {
+        state.redRobot = nextPos;
+        return;
       }
     }
-
-    if (canMove) {
-      state.redRobot = nextPos;
-      if (lastMove)
-        return;
-    } else
-      return;
+    state.redRobot = nextPos;
   }
 }
 void moveRedRight(boardState state) {}
@@ -85,11 +73,11 @@ void moveYellowUp(boardState state) {}
 void moveYellowDown(boardState state) {}
 
 int main() {
-    Board board(5, 5);
-    board.addWall(0, 0, false, true, false, true);
-    board.addWall(2, 2, true, false, false, false);
+  Board board(5, 5);
+  board.addWall(0, 0, false, true, false, true);
+  board.addWall(2, 2, true, false, false, false);
 
-    board.drawBoard();
+  board.drawBoard();
 
-    return 0;
+  return 0;
 }
