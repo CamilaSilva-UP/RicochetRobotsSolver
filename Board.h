@@ -1,42 +1,36 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <vector>
+#include "Utils.h"
 #include <iostream>
-
-struct Position {
-    int x;
-    int y;
-
-    bool operator==(const Position& other) const {
-        return x == other.x && y == other.y;
-    }
-};
+#include <vector>
 
 struct Wall {
-    Position pos;
-    bool up;
-    bool down;
-    bool left;
-    bool right;
+  Position pos;
+  bool up;
+  bool down;
+  bool left;
+  bool right;
 };
 
 class Board {
 private:
-    int width;
-    int height;
-    std::vector<Wall> walls;
+  int width;
+  int height;
+  std::vector<Wall> walls;
 
 public:
-    Board(int width, int height);
+  Board(int width, int height);
 
-    void addWall(int x, int y, bool up, bool down, bool left, bool right);
+  void addWall(int x, int y, bool up, bool down, bool left, bool right);
 
-    bool isInside(int x, int y) const;
+  bool isInside(int x, int y) const;
 
-    bool hasWall(int x, int y, int dx, int dy) const;
+  bool hasWall(int x, int y, int dx, int dy) const;
 
-    void drawBoard() const;
+  void drawBoard() const;
+
+  std::vector<Wall> getWalls();
 };
 
 #endif
