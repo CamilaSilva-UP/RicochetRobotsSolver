@@ -10,7 +10,7 @@ private:
 
 public:
   Position getPos();
-  Position setPos(Position pos);
+  void setPos(Position pos);
 };
 
 #endif
