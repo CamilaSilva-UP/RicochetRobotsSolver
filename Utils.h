@@ -10,6 +10,14 @@ struct Position {
   }
 };
 
+struct Wall {
+  Position pos;
+  bool up;
+  bool down;
+  bool left;
+  bool right;
+};
+
 enum Color { Red, Green, Blue, Yellow };
 
 #endif

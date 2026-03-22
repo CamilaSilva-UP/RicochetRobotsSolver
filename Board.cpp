@@ -87,3 +87,12 @@ void Board::drawBoard(sf::RenderWindow &window) const {
 }
 
 std::vector<Wall> Board::getWalls() { return this->walls; }
+
+void Board::placeQuadrant(const Quadrant &q, int offsetX, int offsetY) {
+  for (const auto &w : q.walls) {
+    addWall(w.pos.x + offsetX, w.pos.y + offsetY, w.up, w.down, w.left, w.right);
+  }
+}
+
+int Board::getWidth() const { return this->width; }
+int Board::getHeight() const { return this->height; }
