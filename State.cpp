@@ -10,7 +10,10 @@ State::State(Board board, Robot redRobot, Robot greenRobot, Robot blueRobot,
 }
 
 Board State::getBoard() { return this->board; }
-Robot State::getRedRobot() { return this->redRobot; }
-Robot State::getGreenRobot() { return this->greenRobot; }
-Robot State::getBlueRobot() { return this->blueRobot; }
-Robot State::getYellowRobot() { return this->blueRobot; }
+
+Robot& State::getRobot(Color color) {
+  if (color == Color::Red) return this->redRobot;
+  if (color == Color::Green) return this->greenRobot;
+  if (color == Color::Blue) return this->blueRobot;
+  if (color == Color::Yellow) return this->yellowRobot; 
+}
