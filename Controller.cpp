@@ -13,6 +13,10 @@ void Controller::moveRobot(State &state, Color color, Direction direction) {
     Position curPos = robot.getPos();
     Position nextPos = {curPos.x + dx, curPos.y + dy};
 
+    if (nextPos.x < 0 || nextPos.x >= 16 || nextPos.y < 0 || nextPos.y >= 16) {
+        break;
+    }
+
     bool stopBeforeEntering = false;
     bool stopAfterEntering = false;
 

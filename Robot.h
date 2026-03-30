@@ -2,6 +2,7 @@
 #define ROBOT_H
 
 #include "Utils.h"
+#include <SFML/Graphics.hpp>
 
 class Robot {
 private:
@@ -11,6 +12,8 @@ private:
 public:
   Position getPos();
   void setPos(Position pos);
+  void setColor(Color c);
+  void draw(sf::RenderWindow& window, float cellSize, float offset);
 };
 
 #endif
