@@ -8,7 +8,7 @@ enum class Direction { UP, DOWN, LEFT, RIGHT };
 
 class Controller {
 public:
-  void moveRobot(State &state, Color color, Direction direction);
+  State moveRobot(State state, Color color, Direction direction);
 };
 
 #endif
