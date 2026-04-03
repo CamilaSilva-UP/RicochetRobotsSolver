@@ -17,3 +17,15 @@ Robot& State::getRobot(Color color) {
   if (color == Color::Blue) return this->blueRobot;
   if (color == Color::Yellow) return this->yellowRobot; 
 }
+
+
+bool State::checkWin(Color targetColor, Position targetPos) {
+    Robot robot = getRobot(targetColor); 
+    Position robotPos = robot.getPos();
+
+    if (robotPos.x == targetPos.x && robotPos.y == targetPos.y) {
+        return true;
+    }
+
+    return false; 
+}

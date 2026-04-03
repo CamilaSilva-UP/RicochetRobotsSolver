@@ -23,6 +23,8 @@ public:
     return redRobot != s.redRobot && greenRobot != s.greenRobot &&
            blueRobot != s.blueRobot && yellowRobot != s.yellowRobot;
   }
+
+  bool checkWin(Color targetColor, Position targetPos);
 };
 
 #endif
