@@ -22,6 +22,11 @@ static const bool DIGITS[10][7] = {
   {true,  true,  true,  true,  false, true,  true},  // 9
 };
 
+struct Target {
+    Position pos;
+    Color color;
+};
+
 void drawDigit(sf::RenderWindow& window, int digit, float x, float y, float h) {
   float sw = h * 0.12f; // segment thickness
   float sl = h * 0.42f; // segment length
@@ -101,6 +106,26 @@ int main() {
   State state(board, redRobot, greenRobot, blueRobot, yellowRobot);
   Controller controller;
 
+  std::vector<Position> validPositions;
+
+  for (auto wall : board.getWalls()) {
+      if ((wall.pos.x == 7 || wall.pos.x == 8) && (wall.pos.y == 7 || wall.pos.y == 8)) {
+          continue; 
+      }
+      validPositions.push_back(wall.pos);
+  }
+
+  std::shuffle(validPositions.begin(), validPositions.end(), std::mt19937{std::random_device{}()});
+
+  std::vector<Target> allTargets = {
+      {validPositions[0], Color::Red},
+      {validPositions[1], Color::Green},
+      {validPositions[2], Color::Blue},
+      {validPositions[3], Color::Yellow}
+  };
+
+  std::shuffle(allTargets.begin(), allTargets.end(), std::mt19937{std::random_device{}()});
+
   float cellSize = 60.0f;
   float offset = 20.0f;
   float panelWidth = 200.0f;
@@ -149,14 +174,41 @@ int main() {
         else if (keyPressed->code == sf::Keyboard::Key::Right)
           state = controller.moveRobot(state, selectedColor, Direction::RIGHT);
 
-        if (!(state.getRobot(selectedColor).getPos() == prevState.getRobot(selectedColor).getPos()))
+        if (!(state.getRobot(selectedColor).getPos() == prevState.getRobot(selectedColor).getPos())){
           moveCount++;
+
+          for (size_t i = 0; i < allTargets.size(); i++) {
+              if (state.checkWin(allTargets[i].color, allTargets[i].pos)) {
+                std::cout << "You reached the target in " << moveCount << " moves" << std::endl;
+                moveCount = 0;      
+                break;
+              }
+          }
+        }
       }
     }
 
     window.clear(sf::Color::White);
 
     state.getBoard().drawBoard(window);
+
+    float targetSize = cellSize;
+    
+    for (const auto& target : allTargets) {
+        sf::RectangleShape targetShape(sf::Vector2f(targetSize, targetSize));
+        
+        float tx = offset + target.pos.x * cellSize;
+        float ty = offset + target.pos.y * cellSize;
+        targetShape.setPosition({tx, ty});
+
+        if (target.color == Color::Red)         targetShape.setFillColor(sf::Color(255, 0, 0, 150));
+        else if (target.color == Color::Green)  targetShape.setFillColor(sf::Color(0, 255, 0, 150));
+        else if (target.color == Color::Blue)   targetShape.setFillColor(sf::Color(0, 0, 255, 150));
+        else if (target.color == Color::Yellow) targetShape.setFillColor(sf::Color(255, 255, 0, 150));
+
+        window.draw(targetShape);
+    }
+
     state.getRobot(Color::Red).draw(window, cellSize, offset);
     state.getRobot(Color::Green).draw(window, cellSize, offset);
     state.getRobot(Color::Blue).draw(window, cellSize, offset);
