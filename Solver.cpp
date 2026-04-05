@@ -18,7 +18,6 @@ std::vector<State> bfs(State initialState) {
     queue.pop_front();
 
     State node = path.back();
-    // TODO: If winning condition, return result
     for (int i = 0; i < 4; i++) {
       if (node.checkWin(colors[i], node.getRobot(colors[i]).getPos())) {
         return path;
