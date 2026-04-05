@@ -14,17 +14,13 @@ std::vector<State> bfs(State initialState, std::vector<Target> targets) {
   // visited.insert(initialState);
   Controller controller;
 
-  for (auto target : targets) {
-    std::cout << target.color << target.pos.x << target.pos.y << std::endl;
-  }
-
   while (!queue.empty()) {
     std::vector<State> path = queue.front();
     queue.pop_front();
 
     State node = path.back();
-    node.print();
-    printf("Path size: %zu\n", path.size());
+    // node.print();
+    // printf("Path size: %zu\n", path.size());
     for (int i = 0; i < 4; i++) {
       if (node.checkWin(targets[i].color, targets[i].pos)) {
         return path;

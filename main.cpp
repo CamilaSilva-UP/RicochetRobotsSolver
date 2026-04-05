@@ -8,6 +8,7 @@
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <random>
+#include <unistd.h>
 
 // 7-segment display: segments = {top, top-right, bottom-right, bottom,
 // bottom-left, top-left, middle}
@@ -154,7 +155,17 @@ int main() {
   std::vector<sf::Color> sfColors = {sf::Color::Red, sf::Color::Green,
                                      sf::Color::Blue, sf::Color::Yellow};
 
+  bool showAISolution = false;
+  std::vector<State> solution;
+  int curSolutionState;
+
   while (window.isOpen()) {
+    if (showAISolution && curSolutionState < solution.size()) {
+      moveCount = curSolutionState;
+      state = solution[curSolutionState];
+      curSolutionState++;
+      sleep(1);
+    }
     while (auto event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>())
         window.close();
@@ -196,8 +207,11 @@ int main() {
 
               // AI solution
 
-              state = initialState;
-              std::vector<State> solution = bfs(state, allTargets);
+              printf("Running BFS...\n");
+
+              solution = bfs(initialState, allTargets);
+              curSolutionState = 0;
+              showAISolution = true;
 
               break;
             }
