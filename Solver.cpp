@@ -8,6 +8,7 @@
 std::vector<State> bfs(State initialState, std::vector<Target> targets) {
   std::deque<std::vector<State>> queue;
   std::vector<State> visited;
+  // TODO: re-organize the colors so that we prioritize the winning color
   std::vector<Color> colors = {Red, Green, Blue, Yellow};
   std::vector<Direction> directions = {Direction::LEFT, Direction::RIGHT,
                                        Direction::DOWN, Direction::UP};
