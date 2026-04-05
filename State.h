@@ -25,6 +25,8 @@ public:
   }
 
   bool checkWin(Color targetColor, Position targetPos);
+
+  void print();
 };
 
 #endif
