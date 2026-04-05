@@ -19,9 +19,9 @@ public:
   Board getBoard();
   Robot &getRobot(Color color);
 
-  bool operator<(const State &s) const {
-    return redRobot != s.redRobot && greenRobot != s.greenRobot &&
-           blueRobot != s.blueRobot && yellowRobot != s.yellowRobot;
+  bool operator==(const State &s) const {
+    return redRobot == s.redRobot && greenRobot == s.greenRobot &&
+           blueRobot == s.blueRobot && yellowRobot == s.yellowRobot;
   }
 
   bool checkWin(Color targetColor, Position targetPos);

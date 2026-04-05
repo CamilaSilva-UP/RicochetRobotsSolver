@@ -6,12 +6,12 @@
 
 std::vector<State> bfs(State initialState, std::vector<Target> targets) {
   std::deque<std::vector<State>> queue;
-  // std::set<State> visited;
+  std::vector<State> visited;
   std::vector<Color> colors = {Red, Green, Blue, Yellow};
   std::vector<Direction> directions = {Direction::LEFT, Direction::RIGHT,
                                        Direction::DOWN, Direction::UP};
   queue.push_back({initialState});
-  // visited.insert(initialState);
+  visited.push_back(initialState);
   Controller controller;
 
   while (!queue.empty()) {
@@ -30,11 +30,19 @@ std::vector<State> bfs(State initialState, std::vector<Target> targets) {
     for (Color color : colors) {
       for (Direction direction : directions) {
         State newState = controller.moveRobot(node, color, direction);
-        // TODO: check visited to not repeat paths
-        std::vector<State> new_path = path;
-        new_path.push_back(newState);
-        queue.push_back(new_path);
-        // visited.insert(newState);
+        bool skip = false;
+        for (State s : visited) {
+          if (s == newState) {
+            skip = true;
+            break;
+          }
+        }
+        if (!skip) {
+          std::vector<State> new_path = path;
+          new_path.push_back(newState);
+          queue.push_back(new_path);
+          visited.push_back(newState);
+        }
       }
     }
   }

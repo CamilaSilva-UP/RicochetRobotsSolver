@@ -15,7 +15,7 @@ public:
   void setColor(Color c);
   void draw(sf::RenderWindow &window, float cellSize, float offset);
 
-  bool operator!=(const Robot &r) const { return !(pos == r.pos); }
+  bool operator==(const Robot &r) const { return pos == r.pos; }
 };
 
 #endif
