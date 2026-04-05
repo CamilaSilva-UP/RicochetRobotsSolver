@@ -3,7 +3,8 @@
 
 #include "Controller.h"
 #include "State.h"
+#include "Utils.h"
 
-std::vector<State> bfs(State initialState);
+std::vector<State> bfs(State initialState, std::vector<Target> targets);
 
 #endif

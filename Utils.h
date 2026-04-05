@@ -20,4 +20,9 @@ struct Wall {
 
 enum Color { Red, Green, Blue, Yellow };
 
+struct Target {
+  Position pos;
+  Color color;
+};
+
 #endif

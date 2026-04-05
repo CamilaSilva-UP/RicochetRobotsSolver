@@ -3,6 +3,7 @@
 #include "Quadrant.h"
 #include "Quadrants.h"
 #include "Robot.h"
+#include "Solver.h"
 #include "State.h"
 #include <SFML/Graphics.hpp>
 #include <algorithm>
@@ -21,11 +22,6 @@ static const bool DIGITS[10][7] = {
     {true, true, true, false, false, false, false},  // 7
     {true, true, true, true, true, true, true},      // 8
     {true, true, true, true, false, true, true},     // 9
-};
-
-struct Target {
-  Position pos;
-  Color color;
 };
 
 void drawDigit(sf::RenderWindow &window, int digit, float x, float y, float h) {
@@ -112,6 +108,7 @@ int main() {
   yellowRobot.setColor(Color::Yellow);
 
   State state(board, redRobot, greenRobot, blueRobot, yellowRobot);
+  State initialState = state;
   Controller controller;
 
   std::vector<Position> validPositions;
@@ -196,6 +193,12 @@ int main() {
               std::cout << "You reached the target in " << moveCount << " moves"
                         << std::endl;
               moveCount = 0;
+
+              // AI solution
+
+              state = initialState;
+              std::vector<State> solution = bfs(state, allTargets);
+
               break;
             }
           }
