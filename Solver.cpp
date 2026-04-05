@@ -1,5 +1,6 @@
 #include "Solver.h"
 #include <deque>
+#include <omp.h>
 #include <set>
 #include <unistd.h>
 #include <vector>
@@ -27,6 +28,7 @@ std::vector<State> bfs(State initialState, std::vector<Target> targets) {
       }
     }
 
+#pragma omp parallel for collapse(2)
     for (Color color : colors) {
       for (Direction direction : directions) {
         State newState = controller.moveRobot(node, color, direction);
