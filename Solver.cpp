@@ -1,30 +1,37 @@
 #include "Solver.h"
 #include <deque>
 #include <set>
+#include <vector>
 
-void bfs(State initialState) {
-  std::deque<State> queue;
+std::vector<State> bfs(State initialState) {
+  std::deque<std::vector<State>> queue;
   std::set<State> visited;
-  std::vector<State> traversalOrder;
   std::vector<Color> colors = {Red, Green, Blue, Yellow};
   std::vector<Direction> directions = {Direction::LEFT, Direction::RIGHT,
                                        Direction::DOWN, Direction::UP};
-  queue.push_back(initialState);
+  queue.push_back({initialState});
   visited.insert(initialState);
   Controller controller;
 
   while (!queue.empty()) {
-    State current = queue.front();
+    std::vector<State> path = queue.front();
     queue.pop_front();
-    traversalOrder.push_back(current);
 
+    State node = path.back();
     // TODO: If winning condition, return result
+    for (int i = 0; i < 4; i++) {
+      if (node.checkWin(colors[i], node.getRobot(colors[i]).getPos())) {
+        return path;
+      }
+    }
 
     for (Color color : colors) {
       for (Direction direction : directions) {
-        State newState = controller.moveRobot(current, color, direction);
-        if (visited.find(newState) != visited.end()) {
-          queue.push_back(newState);
+        State newState = controller.moveRobot(node, color, direction);
+        if (visited.find(newState) == visited.end()) {
+          std::vector<State> new_path = path;
+          new_path.push_back(newState);
+          queue.push_back(new_path);
           visited.insert(newState);
         }
       }

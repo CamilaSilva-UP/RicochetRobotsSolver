@@ -4,6 +4,6 @@
 #include "Controller.h"
 #include "State.h"
 
-void bfs(State initialState);
+std::vector<State> bfs(State initialState);
 
 #endif
