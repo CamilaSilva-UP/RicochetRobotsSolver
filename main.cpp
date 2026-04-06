@@ -159,6 +159,7 @@ int main() {
   std::vector<State> solution;
   int curSolutionState;
   bool runAIAfterDraw = false;
+  int targetN = 0;
 
   while (window.isOpen()) {
     if (showAISolution && curSolutionState < solution.size()) {
@@ -205,6 +206,7 @@ int main() {
               std::cout << "You reached the target in " << moveCount << " moves"
                         << std::endl;
               runAIAfterDraw = true;
+              targetN = i;
 
               break;
             }
@@ -280,7 +282,7 @@ int main() {
     if (runAIAfterDraw) {
       printf("Running BFS...\n");
 
-      solution = bfs(initialState, allTargets);
+      solution = bfs(initialState, allTargets[targetN]);
       curSolutionState = 0;
       showAISolution = true;
       runAIAfterDraw = false;

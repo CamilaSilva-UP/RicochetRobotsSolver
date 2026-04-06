@@ -5,6 +5,6 @@
 #include "State.h"
 #include "Utils.h"
 
-std::vector<State> bfs(State initialState, std::vector<Target> targets);
+std::vector<State> bfs(State initialState, Target target);
 
 #endif

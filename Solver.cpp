@@ -5,11 +5,24 @@
 #include <unistd.h>
 #include <vector>
 
-std::vector<State> bfs(State initialState, std::vector<Target> targets) {
+std::vector<State> bfs(State initialState, Target target) {
   std::deque<std::vector<State>> queue;
   std::vector<State> visited;
-  // TODO: re-organize the colors so that we prioritize the winning color
-  std::vector<Color> colors = {Red, Green, Blue, Yellow};
+  std::vector<Color> colors;
+  switch (target.color) {
+  case Red:
+    colors = {Red, Green, Blue, Yellow};
+    break;
+  case Green:
+    colors = {Green, Red, Blue, Yellow};
+    break;
+  case Blue:
+    colors = {Blue, Red, Green, Yellow};
+    break;
+  case Yellow:
+    colors = {Yellow, Red, Green, Blue};
+    break;
+  }
   std::vector<Direction> directions = {Direction::LEFT, Direction::RIGHT,
                                        Direction::DOWN, Direction::UP};
   queue.push_back({initialState});
@@ -23,10 +36,8 @@ std::vector<State> bfs(State initialState, std::vector<Target> targets) {
     State node = path.back();
     // node.print();
     // printf("Path size: %zu\n", path.size());
-    for (int i = 0; i < 4; i++) {
-      if (node.checkWin(targets[i].color, targets[i].pos)) {
-        return path;
-      }
+    if (node.checkWin(target.color, target.pos)) {
+      return path;
     }
 
 #pragma omp parallel for collapse(2)
