@@ -14,13 +14,13 @@ std::vector<State> bfs(State initialState, Target target) {
     colors = {Red, Green, Blue, Yellow};
     break;
   case Green:
-    colors = {Green, Red, Blue, Yellow};
+    colors = {Green, Red, Yellow, Blue};
     break;
   case Blue:
-    colors = {Blue, Red, Green, Yellow};
+    colors = {Blue, Red, Yellow, Green};
     break;
   case Yellow:
-    colors = {Yellow, Red, Green, Blue};
+    colors = {Yellow, Blue, Green, Red};
     break;
   }
   std::vector<Direction> directions = {Direction::LEFT, Direction::RIGHT,

@@ -281,8 +281,9 @@ int main() {
 
     if (runAIAfterDraw) {
       printf("Running BFS...\n");
-
       solution = bfs(initialState, allTargets[targetN]);
+      printf("Showing optimal solution\n");
+
       curSolutionState = 0;
       showAISolution = true;
       runAIAfterDraw = false;
