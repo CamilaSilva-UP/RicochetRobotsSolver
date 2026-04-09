@@ -73,11 +73,14 @@ void printNode(Node node) {
 std::vector<State> aStar(State initialState, Target target) {
   Controller controller;
   std::priority_queue<Node, std::vector<Node>, std::greater<Node>> nodeQueue;
+  std::vector<State> visited;
+
   Node root = {&initialState, NULL, 0, estimative(initialState, target),
                estimative(initialState, target)};
   nodeQueue.push(root);
+  visited.push_back(initialState);
 
-  while (true) {
+  while (!nodeQueue.empty()) {
     Node toExplore = nodeQueue.top();
     nodeQueue.pop();
     printNode(toExplore);
@@ -95,7 +98,17 @@ std::vector<State> aStar(State initialState, Target target) {
         if (childState.checkWin(target.color, target.pos))
           return rebuildPath(newNode);
 
-        nodeQueue.push(newNode);
+        bool skip = false;
+        for (State s : visited) {
+          if (s == childState) {
+            skip = true;
+            break;
+          }
+        }
+        if (!skip) {
+          nodeQueue.push(newNode);
+          visited.push_back(childState);
+        }
       }
     }
   }
