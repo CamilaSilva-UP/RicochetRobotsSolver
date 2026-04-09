@@ -25,7 +25,7 @@ public:
   // this would need more tweaking to be used, since it would need to return 3
   // possibilities (no wall, wall (cant move), or wall (move then stop)) bool
   //
-  // hasWall(int x, int y, int dx, int dy) const;
+  bool hasWall(int x, int y, int dx, int dy) const;
 
   void drawBoard(sf::RenderWindow &window) const;
 

@@ -25,17 +25,17 @@ bool Board::isInside(int x, int y) const {
   return x >= 0 && x < width && y >= 0 && y < height;
 }
 
-// bool Board::hasWall(int x, int y, int dx, int dy) const{
-//     for (auto &w : walls) {
-//         if (w.pos.x == x && w.pos.y == y) {
-//             if (dx == -1 && w.left) return true;
-//             if (dx == 1 && w.right) return true;
-//             if (dy == 1 && w.down) return true;
-//             if (dy == -1 && w.up) return  true;
-//         }
-//     }
-//     return false;
-// }
+bool Board::hasWall(int x, int y, int dx, int dy) const{
+  for (auto &w : walls) {
+    if (w.pos.x == x && w.pos.y == y) {
+      if (dx == -1 && w.left) return true;
+      if (dx == 1 && w.right) return true;
+      if (dy == 1 && w.down) return true;
+      if (dy == -1 && w.up) return  true;
+    }
+  }
+  return false;
+}
 
 void Board::drawBoard(sf::RenderWindow &window) const {
   float cellSize = 60.0f;

@@ -121,7 +121,14 @@ int main() {
         (wall.pos.y ==1 || wall.pos.y == 14))) {
       continue;
     }
-    validPositions.push_back(wall.pos);
+    bool up    = board.hasWall(wall.pos.x, wall.pos.y, 0, -1);
+    bool down  = board.hasWall(wall.pos.x, wall.pos.y, 0, 1);
+    bool left  = board.hasWall(wall.pos.x, wall.pos.y, -1, 0);
+    bool right = board.hasWall(wall.pos.x, wall.pos.y, 1, 0);
+
+    if ((up && left) || (up && right) || (down && left) || (down && right)) {
+      validPositions.push_back(wall.pos);
+    }
   }
 
   std::shuffle(validPositions.begin(), validPositions.end(),
