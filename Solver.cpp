@@ -64,6 +64,12 @@ std::vector<State> bfs(State initialState, Target target) {
 
 bool operator>(Node const &n1, Node const &n2) { return n1.f > n2.f; }
 
+void printNode(Node node) {
+  node.state->print();
+  printf("%d\n", node.currentCost);
+  printf("%d\n", node.estimateToGoal);
+}
+
 std::vector<State> aStar(State initialState, Target target) {
   Controller controller;
   std::priority_queue<Node, std::vector<Node>, std::greater<Node>> nodeQueue;
@@ -73,6 +79,8 @@ std::vector<State> aStar(State initialState, Target target) {
 
   while (true) {
     Node toExplore = nodeQueue.top();
+    nodeQueue.pop();
+    printNode(toExplore);
     for (int color = 0; color < 4; color++) {
       for (int direction = 0; direction < 4; direction++) {
         State childState = controller.moveRobot(*toExplore.state, Color(color),
