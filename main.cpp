@@ -116,14 +116,14 @@ int main() {
 
   for (auto wall : board.getWalls()) {
     if (((wall.pos.x == 7 || wall.pos.x == 8) &&
-        (wall.pos.y == 7 || wall.pos.y == 8)) || 
-        ((wall.pos.x == 1 || wall.pos.x == 14) && 
-        (wall.pos.y ==1 || wall.pos.y == 14))) {
+         (wall.pos.y == 7 || wall.pos.y == 8)) ||
+        ((wall.pos.x == 1 || wall.pos.x == 14) &&
+         (wall.pos.y == 1 || wall.pos.y == 14))) {
       continue;
     }
-    bool up    = board.hasWall(wall.pos.x, wall.pos.y, 0, -1);
-    bool down  = board.hasWall(wall.pos.x, wall.pos.y, 0, 1);
-    bool left  = board.hasWall(wall.pos.x, wall.pos.y, -1, 0);
+    bool up = board.hasWall(wall.pos.x, wall.pos.y, 0, -1);
+    bool down = board.hasWall(wall.pos.x, wall.pos.y, 0, 1);
+    bool left = board.hasWall(wall.pos.x, wall.pos.y, -1, 0);
     bool right = board.hasWall(wall.pos.x, wall.pos.y, 1, 0);
 
     if ((up && left) || (up && right) || (down && left) || (down && right)) {
@@ -289,8 +289,8 @@ int main() {
     window.display();
 
     if (runAIAfterDraw) {
-      printf("Running BFS...\n");
-      solution = bfs(initialState, allTargets[targetN]);
+      printf("Running A*...\n");
+      solution = aStar(initialState, allTargets[targetN]);
       printf("Showing optimal solution\n");
 
       curSolutionState = 0;

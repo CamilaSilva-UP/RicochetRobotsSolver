@@ -1,7 +1,7 @@
 #include "Solver.h"
+#include <algorithm>
 #include <deque>
-#include <omp.h>
-#include <set>
+#include <queue>
 #include <unistd.h>
 #include <vector>
 
@@ -60,4 +60,57 @@ std::vector<State> bfs(State initialState, Target target) {
       }
     }
   }
+}
+
+bool operator>(Node const &n1, Node const &n2) { return n1.f > n2.f; }
+
+std::vector<State> aStar(State initialState, Target target) {
+  Controller controller;
+  std::priority_queue<Node, std::vector<Node>, std::greater<Node>> nodeQueue;
+  Node root = {&initialState, NULL, 0, estimative(initialState, target),
+               estimative(initialState, target)};
+  nodeQueue.push(root);
+
+  while (true) {
+    Node toExplore = nodeQueue.top();
+    for (int color = 0; color < 4; color++) {
+      for (int direction = 0; direction < 4; direction++) {
+        State childState = controller.moveRobot(*toExplore.state, Color(color),
+                                                Direction(direction));
+        Node parent = toExplore;
+        int childCost = toExplore.currentCost + 1;
+        int estimativeToGoal = estimative(childState, target);
+
+        Node newNode = {&childState, &parent, childCost, estimativeToGoal,
+                        childCost + estimativeToGoal};
+
+        if (childState.checkWin(target.color, target.pos))
+          return rebuildPath(newNode);
+
+        nodeQueue.push(newNode);
+      }
+    }
+  }
+}
+
+int estimative(State state, Target target) {
+  Position robotPos = state.getRobot(target.color).getPos();
+  Position targetPos = target.pos;
+  if (robotPos.x == targetPos.x && robotPos.y == targetPos.y)
+    return 0;
+  else if (robotPos.x == targetPos.x || robotPos.y == targetPos.y)
+    return 1;
+  else
+    return 2;
+}
+
+std::vector<State> rebuildPath(Node leaf) {
+  std::vector<State> path;
+  while (leaf.parent != NULL) {
+    path.push_back(*leaf.state);
+    leaf = *leaf.parent;
+  }
+  path.push_back(*leaf.state);
+  std::reverse(path.begin(), path.end());
+  return path;
 }
