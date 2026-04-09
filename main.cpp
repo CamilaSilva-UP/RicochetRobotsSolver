@@ -115,8 +115,10 @@ int main() {
   std::vector<Position> validPositions;
 
   for (auto wall : board.getWalls()) {
-    if ((wall.pos.x == 7 || wall.pos.x == 8) &&
-        (wall.pos.y == 7 || wall.pos.y == 8)) {
+    if (((wall.pos.x == 7 || wall.pos.x == 8) &&
+        (wall.pos.y == 7 || wall.pos.y == 8)) || 
+        ((wall.pos.x == 1 || wall.pos.x == 14) && 
+        (wall.pos.y ==1 || wall.pos.y == 14))) {
       continue;
     }
     validPositions.push_back(wall.pos);
