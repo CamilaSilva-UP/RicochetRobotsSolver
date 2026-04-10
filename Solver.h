@@ -8,7 +8,7 @@
 std::vector<State> bfs(State initialState, Target target);
 
 struct Node {
-  State *state;
+  State state;
   Node *parent;
   int currentCost;
   int estimateToGoal;

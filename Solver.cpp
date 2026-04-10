@@ -65,7 +65,7 @@ std::vector<State> bfs(State initialState, Target target) {
 bool operator>(Node const &n1, Node const &n2) { return n1.f > n2.f; }
 
 void printNode(Node node) {
-  node.state->print();
+  node.state.print();
   printf("%d\n", node.currentCost);
   printf("%d\n", node.estimateToGoal);
 }
@@ -75,7 +75,7 @@ std::vector<State> aStar(State initialState, Target target) {
   std::priority_queue<Node, std::vector<Node>, std::greater<Node>> nodeQueue;
   std::vector<State> visited;
 
-  Node root = {&initialState, NULL, 0, estimative(initialState, target),
+  Node root = {initialState, NULL, 0, estimative(initialState, target),
                estimative(initialState, target)};
   nodeQueue.push(root);
   visited.push_back(initialState);
@@ -84,20 +84,19 @@ std::vector<State> aStar(State initialState, Target target) {
     Node toExplore = nodeQueue.top();
     nodeQueue.pop();
     printNode(toExplore);
+
     for (int color = 0; color < 4; color++) {
       for (int direction = 0; direction < 4; direction++) {
-        State childState = controller.moveRobot(*toExplore.state, Color(color),
+        State childState = controller.moveRobot(toExplore.state, Color(color),
                                                 Direction(direction));
         Node parent = toExplore;
         int childCost = toExplore.currentCost + 1;
         int estimativeToGoal = estimative(childState, target);
 
-        Node newNode = {&childState, &parent, childCost, estimativeToGoal,
+        Node newNode = {childState, &parent, childCost, estimativeToGoal,
                         childCost + estimativeToGoal};
-
         if (childState.checkWin(target.color, target.pos))
           return rebuildPath(newNode);
-
         bool skip = false;
         for (State s : visited) {
           if (s == childState) {
@@ -128,10 +127,10 @@ int estimative(State state, Target target) {
 std::vector<State> rebuildPath(Node leaf) {
   std::vector<State> path;
   while (leaf.parent != NULL) {
-    path.push_back(*leaf.state);
+    path.push_back(leaf.state);
     leaf = *leaf.parent;
   }
-  path.push_back(*leaf.state);
+  path.push_back(leaf.state);
   std::reverse(path.begin(), path.end());
   return path;
 }
