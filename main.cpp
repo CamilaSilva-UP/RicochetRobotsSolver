@@ -6,6 +6,7 @@
 #include "Solver.h"
 #include "State.h"
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <algorithm>
 #include <random>
 #include <unistd.h>
@@ -192,6 +193,64 @@ int main() {
             if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH)
               selectedColor = btnColors[i];
           }
+          float bx = panelX + 20.0f;
+          float by = btnsY + 50 + 4 * (btnH + btnSpacing);
+          if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) {
+            board = Board(16, 16);
+            std::shuffle(quadrants.begin(), quadrants.end(),
+                         std::mt19937{std::random_device{}()});
+
+            for (int i = 0; i < 4 && i < (int)quadrants.size(); i++) {
+              board.placeQuadrant(rotateQuadrant(quadrants[i], rotations[i]),
+                                  positions[i].first, positions[i].second);
+            }
+            redRobot.setPos({1, 1});
+            greenRobot.setPos({14, 1});
+            blueRobot.setPos({1, 14});
+            yellowRobot.setPos({14, 14});
+
+            state = State(board, redRobot, greenRobot, blueRobot, yellowRobot);
+            initialState = state;
+
+            validPositions.clear();
+            for (auto wall : board.getWalls()) {
+              if (((wall.pos.x == 7 || wall.pos.x == 8) &&
+                   (wall.pos.y == 7 || wall.pos.y == 8)) ||
+                  ((wall.pos.x == 1 || wall.pos.x == 14) &&
+                   (wall.pos.y == 1 || wall.pos.y == 14))) {
+                continue;
+              }
+              bool up = board.hasWall(wall.pos.x, wall.pos.y, 0, -1);
+              bool down = board.hasWall(wall.pos.x, wall.pos.y, 0, 1);
+              bool left = board.hasWall(wall.pos.x, wall.pos.y, -1, 0);
+              bool right = board.hasWall(wall.pos.x, wall.pos.y, 1, 0);
+
+              if ((up && left) || (up && right) || (down && left) ||
+                  (down && right)) {
+                validPositions.push_back(wall.pos);
+              }
+            }
+
+            std::shuffle(validPositions.begin(), validPositions.end(),
+                         std::mt19937{std::random_device{}()});
+
+            allTargets = {{validPositions[0], Color::Red},
+                          {validPositions[1], Color::Green},
+                          {validPositions[2], Color::Blue},
+                          {validPositions[3], Color::Yellow}};
+
+            std::shuffle(allTargets.begin(), allTargets.end(),
+                         std::mt19937{std::random_device{}()});
+
+            int moveCount = 0;
+            Color selectedColor = Color::Red;
+
+            bool showAISolution = false;
+            std::vector<State> solution;
+            int curSolutionState;
+            bool runAIAfterDraw = false;
+            int targetN = 0;
+          }
         }
       }
 
@@ -285,6 +344,11 @@ int main() {
       btn.setFillColor(sfColors[i]);
       window.draw(btn);
     }
+
+    sf::RectangleShape btn(sf::Vector2f(btnW, btnH));
+    btn.setPosition({panelX + 20.0f, btnsY + 50 + 4 * (btnH + btnSpacing)});
+    btn.setFillColor(sf::Color::Magenta);
+    window.draw(btn);
 
     window.display();
 
