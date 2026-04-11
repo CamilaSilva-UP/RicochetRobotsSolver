@@ -1,5 +1,6 @@
 #include "Board.h"
 #include "Controller.h"
+#include "Menu.h"
 #include "Quadrant.h"
 #include "Quadrants.h"
 #include "Robot.h"
@@ -151,6 +152,8 @@ int main() {
   unsigned int winH = (unsigned int)(offset * 2 + board.getHeight() * cellSize);
   sf::RenderWindow window(sf::VideoMode({winW, winH}), "Ricochet Robots!");
 
+  Screen currentScreen = Screen::MENU;
+
   int moveCount = 0;
   Color selectedColor = Color::Red;
 
@@ -167,16 +170,32 @@ int main() {
 
   bool showAISolution = false;
   std::vector<State> solution;
-  int curSolutionState;
+  int curSolutionState = 0;
   bool runAIAfterDraw = false;
   int targetN = 0;
 
+  sf::Clock announceClock;
+  bool showAnnounce = false;
+  bool runAISolverBtn = false;
+  bool runPhase2 = false;
+  bool aiPhase2Pending = false;
+  int  aiCounterOffset = 0;
+
   while (window.isOpen()) {
-    if (showAISolution && curSolutionState < solution.size()) {
-      moveCount = curSolutionState;
-      state = solution[curSolutionState];
-      curSolutionState++;
-      sleep(1);
+    if (showAISolution) {
+      if (curSolutionState < (int)solution.size()) {
+        state = solution[curSolutionState];
+        moveCount = aiCounterOffset + curSolutionState;
+        curSolutionState++;
+        sleep(1);
+      } else if (aiPhase2Pending) {
+        // Fase 1 terminada: reset ao estado inicial e arranca fase 2
+        aiPhase2Pending = false;
+        showAISolution  = false;
+        state           = initialState;
+        moveCount       = 0;
+        runPhase2       = true;
+      }
     }
     while (auto event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>())
@@ -187,6 +206,15 @@ int main() {
         if (mouseClick->button == sf::Mouse::Button::Left) {
           float mx = (float)mouseClick->position.x;
           float my = (float)mouseClick->position.y;
+          if (currentScreen != Screen::GAME) {
+            Screen prev = currentScreen;
+            currentScreen = handleMenuClick(currentScreen, mx, my, (float)winW, (float)winH);
+            if (prev == Screen::MENU && currentScreen == Screen::GAME) {
+              targetN = (int)(std::mt19937{std::random_device{}()}() % allTargets.size());
+              showAnnounce = true;
+              announceClock.restart();
+            }
+          }
           for (int i = 0; i < 4; i++) {
             float by = btnsY + i * (btnH + btnSpacing);
             float bx = panelX + 20.0f;
@@ -242,18 +270,26 @@ int main() {
             std::shuffle(allTargets.begin(), allTargets.end(),
                          std::mt19937{std::random_device{}()});
 
-            int moveCount = 0;
-            Color selectedColor = Color::Red;
-
-            bool showAISolution = false;
-            std::vector<State> solution;
-            int curSolutionState;
-            bool runAIAfterDraw = false;
-            int targetN = 0;
+            moveCount = 0;
+            selectedColor = Color::Red;
+            showAISolution = false;
+            solution.clear();
+            curSolutionState = 0;
+            runAIAfterDraw = false;
+            targetN = (int)(std::mt19937{std::random_device{}()}() % allTargets.size());
+            showAnnounce = true;
+            announceClock.restart();
+          }
+          // Botão AI Solver
+          float aiBtnY = btnsY + 50 + 4*(btnH+btnSpacing) + btnH + 14.f + 20.f + 28.f + 12.f;
+          if (mx >= panelX+20.f && mx <= panelX+20.f+btnW &&
+              my >= aiBtnY     && my <= aiBtnY + btnH) {
+            runAISolverBtn = true;
           }
         }
       }
 
+      if (currentScreen == Screen::GAME)
       if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
         State prevState = state;
         if (keyPressed->code == sf::Keyboard::Key::Up)
@@ -269,42 +305,48 @@ int main() {
               prevState.getRobot(selectedColor).getPos())) {
           moveCount++;
 
-          for (size_t i = 0; i < allTargets.size(); i++) {
-            if (state.checkWin(allTargets[i].color, allTargets[i].pos)) {
-              std::cout << "You reached the target in " << moveCount << " moves"
-                        << std::endl;
-              runAIAfterDraw = true;
-              targetN = i;
-
-              break;
-            }
+          if (state.checkWin(allTargets[targetN].color, allTargets[targetN].pos)) {
+            std::cout << "You reached the target in " << moveCount << " moves" << std::endl;
+            runAIAfterDraw = true;
           }
         }
       }
     }
 
-    window.clear(sf::Color::White);
+    auto mousePos = sf::Mouse::getPosition(window);
+    float mx = (float)mousePos.x, my = (float)mousePos.y;
 
+    window.clear(sf::Color::Black);
+
+    if (currentScreen == Screen::MENU) {
+      drawMenuScreen(window, (float)winW, (float)winH, mx, my);
+      window.display();
+      continue;
+    }
+    if (currentScreen == Screen::CONTROLS) {
+      drawControlsScreen(window, (float)winW, (float)winH, mx, my);
+      window.display();
+      continue;
+    }
+    if (currentScreen == Screen::HOW_TO_PLAY) {
+      drawHowToPlayScreen(window, (float)winW, (float)winH, mx, my);
+      window.display();
+      continue;
+    }
+
+    // GAME
     state.getBoard().drawBoard(window);
 
-    float targetSize = cellSize;
-
-    for (const auto &target : allTargets) {
-      sf::RectangleShape targetShape(sf::Vector2f(targetSize, targetSize));
-
-      float tx = offset + target.pos.x * cellSize;
-      float ty = offset + target.pos.y * cellSize;
-      targetShape.setPosition({tx, ty});
-
-      if (target.color == Color::Red)
-        targetShape.setFillColor(sf::Color(255, 0, 0, 150));
-      else if (target.color == Color::Green)
-        targetShape.setFillColor(sf::Color(0, 255, 0, 150));
-      else if (target.color == Color::Blue)
-        targetShape.setFillColor(sf::Color(0, 0, 255, 150));
-      else if (target.color == Color::Yellow)
-        targetShape.setFillColor(sf::Color(255, 255, 0, 150));
-
+    // Só mostrar o alvo actual
+    {
+      const auto &target = allTargets[targetN];
+      sf::RectangleShape targetShape(sf::Vector2f(cellSize, cellSize));
+      targetShape.setPosition({offset + target.pos.x * cellSize,
+                               offset + target.pos.y * cellSize});
+      if      (target.color == Color::Red)    targetShape.setFillColor(sf::Color(255,   0,   0, 180));
+      else if (target.color == Color::Green)  targetShape.setFillColor(sf::Color(  0, 200,   0, 180));
+      else if (target.color == Color::Blue)   targetShape.setFillColor(sf::Color(  0,   0, 255, 180));
+      else if (target.color == Color::Yellow) targetShape.setFillColor(sf::Color(255, 220,   0, 180));
       window.draw(targetShape);
     }
 
@@ -350,17 +392,68 @@ int main() {
     btn.setFillColor(sf::Color::Magenta);
     window.draw(btn);
 
+    // Indicador permanente do alvo abaixo do botão magenta
+    float resetBtnY = btnsY + 50 + 4 * (btnH + btnSpacing);
+    float indicatorY = resetBtnY + btnH + 14.f;
+    drawTargetIndicator(window, allTargets[targetN].color,
+                        panelX + 20.f, indicatorY, btnW);
+
+    // Botão AI Solver
+    float aiBtnY = indicatorY + 20.f + 28.f + 12.f;
+    drawAIButton(window, panelX + 20.f, aiBtnY, btnW, btnH,
+                 mx >= panelX+20.f && mx <= panelX+20.f+btnW &&
+                 my >= aiBtnY && my <= aiBtnY+btnH);
+
+    // Anúncio de 5 segundos
+    if (showAnnounce) {
+      if (announceClock.getElapsedTime().asSeconds() < 5.f) {
+        float boardCx = offset + board.getWidth()  * cellSize / 2.f;
+        float boardCy = offset + board.getHeight() * cellSize / 2.f;
+        drawGameAnnounce(window, allTargets[targetN].color, boardCx, boardCy);
+      } else {
+        showAnnounce = false;
+      }
+    }
+
     window.display();
 
     if (runAIAfterDraw) {
-      printf("Running A*...\n");
+      // Ganhou jogando: reset contador, mostra solução ótima do início
+      aiCounterOffset = 0;
+      moveCount = 0;
       solution = aStar(initialState, allTargets[targetN]);
       solution.insert(solution.begin(), initialState);
-      printf("Showing optimal solution\n");
-
       curSolutionState = 0;
       showAISolution = true;
       runAIAfterDraw = false;
+    }
+    if (runAISolverBtn) {
+      if (moveCount == 0) {
+        // Caso 2: sem movimentos - mostra solução ótima do início
+        aiCounterOffset = 0;
+        aiPhase2Pending = false;
+        solution = aStar(initialState, allTargets[targetN]);
+        solution.insert(solution.begin(), initialState);
+      } else {
+        // Caso 3: com movimentos - continua a partir do estado atual,
+        // depois mostra solução ótima do início
+        aiCounterOffset = moveCount;
+        aiPhase2Pending = true;
+        solution = aStar(state, allTargets[targetN]);
+        solution.insert(solution.begin(), state);
+      }
+      curSolutionState = 0;
+      showAISolution = true;
+      runAISolverBtn = false;
+    }
+    if (runPhase2) {
+      // Fase 2: mostra solução ótima do estado inicial
+      aiCounterOffset = 0;
+      solution = aStar(initialState, allTargets[targetN]);
+      solution.insert(solution.begin(), initialState);
+      curSolutionState = 0;
+      showAISolution = true;
+      runPhase2 = false;
     }
   }
 

@@ -18,6 +18,8 @@ void Robot::draw(sf::RenderWindow& window, float cellSize, float offset) {
     float px = offset + (pos.x * cellSize) + (cellSize / 2.0f) - radius;
     float py = offset + (pos.y * cellSize) + (cellSize / 2.0f) - radius;
 
+    shape.setOutlineThickness(3.f);
+    shape.setOutlineColor(sf::Color::Black);
     shape.setPosition({px, py});
     window.draw(shape);
 }
