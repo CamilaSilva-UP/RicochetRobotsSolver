@@ -291,6 +291,7 @@ int main() {
     if (runAIAfterDraw) {
       printf("Running A*...\n");
       solution = aStar(initialState, allTargets[targetN]);
+      solution.insert(solution.begin(), initialState);
       printf("Showing optimal solution\n");
 
       curSolutionState = 0;
