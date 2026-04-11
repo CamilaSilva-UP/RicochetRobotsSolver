@@ -10,7 +10,7 @@ private:
   Color color;
 
 public:
-  Position getPos();
+  Position getPos() const;
   void setPos(Position pos);
   void setColor(Color c);
   void draw(sf::RenderWindow &window, float cellSize, float offset);

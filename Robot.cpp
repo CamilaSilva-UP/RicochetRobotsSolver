@@ -1,6 +1,6 @@
 #include "Robot.h"
 
-Position Robot::getPos() { return this->pos; }
+Position Robot::getPos() const { return this->pos; }
 void Robot::setPos(Position pos) { this->pos = pos; }  
 void Robot::setColor(Color c) {
     this->color = c;

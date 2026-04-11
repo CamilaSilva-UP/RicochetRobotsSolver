@@ -9,7 +9,7 @@ std::vector<State> bfs(State initialState, Target target);
 
 struct Node {
   State state;
-  Node *parent;
+  std::vector<State> path;
   int currentCost;
   int estimateToGoal;
   int f;

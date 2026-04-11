@@ -4,6 +4,7 @@
 #include <queue>
 #include <unistd.h>
 #include <vector>
+#include <set>
 
 std::vector<State> bfs(State initialState, Target target) {
   std::deque<std::vector<State>> queue;
@@ -73,12 +74,12 @@ void printNode(Node node) {
 std::vector<State> aStar(State initialState, Target target) {
   Controller controller;
   std::priority_queue<Node, std::vector<Node>, std::greater<Node>> nodeQueue;
-  std::vector<State> visited;
+  std::set<State> visited;
 
-  Node root = {initialState, NULL, 0, estimative(initialState, target),
+  Node root = {initialState, {}, 0, estimative(initialState, target),
                estimative(initialState, target)};
   nodeQueue.push(root);
-  visited.push_back(initialState);
+  visited.insert(initialState);
 
   while (!nodeQueue.empty()) {
     Node toExplore = nodeQueue.top();
@@ -89,28 +90,25 @@ std::vector<State> aStar(State initialState, Target target) {
       for (int direction = 0; direction < 4; direction++) {
         State childState = controller.moveRobot(toExplore.state, Color(color),
                                                 Direction(direction));
-        Node parent = toExplore;
+        std::vector<State> newPath = toExplore.path;
+        newPath.push_back(childState);
+
         int childCost = toExplore.currentCost + 1;
         int estimativeToGoal = estimative(childState, target);
 
-        Node newNode = {childState, &parent, childCost, estimativeToGoal,
-                        childCost + estimativeToGoal};
+        Node newNode = {childState, newPath, childCost, estimativeToGoal, childCost + estimativeToGoal};
         if (childState.checkWin(target.color, target.pos))
-          return rebuildPath(newNode);
+          return newPath;
         bool skip = false;
-        for (State s : visited) {
-          if (s == childState) {
-            skip = true;
-            break;
-          }
-        }
-        if (!skip) {
-          nodeQueue.push(newNode);
-          visited.push_back(childState);
+        if (visited.count(childState) == 0) { 
+            nodeQueue.push(newNode);
+            visited.insert(childState);
         }
       }
     }
   }
+
+  return {};
 }
 
 int estimative(State state, Target target) {
@@ -124,13 +122,3 @@ int estimative(State state, Target target) {
     return 2;
 }
 
-std::vector<State> rebuildPath(Node leaf) {
-  std::vector<State> path;
-  while (leaf.parent != NULL) {
-    path.push_back(leaf.state);
-    leaf = *leaf.parent;
-  }
-  path.push_back(leaf.state);
-  std::reverse(path.begin(), path.end());
-  return path;
-}
