@@ -2,9 +2,9 @@
 #include <algorithm>
 #include <deque>
 #include <queue>
+#include <set>
 #include <unistd.h>
 #include <vector>
-#include <set>
 
 std::vector<State> bfs(State initialState, Target target) {
   std::deque<std::vector<State>> queue;
@@ -76,7 +76,10 @@ std::vector<State> aStar(State initialState, Target target) {
   std::priority_queue<Node, std::vector<Node>, std::greater<Node>> nodeQueue;
   std::set<State> visited;
 
-  Node root = {initialState, {}, 0, estimative(initialState, target),
+  Node root = {initialState,
+               {},
+               0,
+               estimative(initialState, target),
                estimative(initialState, target)};
   nodeQueue.push(root);
   visited.insert(initialState);
@@ -84,7 +87,7 @@ std::vector<State> aStar(State initialState, Target target) {
   while (!nodeQueue.empty()) {
     Node toExplore = nodeQueue.top();
     nodeQueue.pop();
-    printNode(toExplore);
+    // printNode(toExplore);
 
     for (int color = 0; color < 4; color++) {
       for (int direction = 0; direction < 4; direction++) {
@@ -96,13 +99,14 @@ std::vector<State> aStar(State initialState, Target target) {
         int childCost = toExplore.currentCost + 1;
         int estimativeToGoal = estimative(childState, target);
 
-        Node newNode = {childState, newPath, childCost, estimativeToGoal, childCost + estimativeToGoal};
+        Node newNode = {childState, newPath, childCost, estimativeToGoal,
+                        childCost + estimativeToGoal};
         if (childState.checkWin(target.color, target.pos))
           return newPath;
         bool skip = false;
-        if (visited.count(childState) == 0) { 
-            nodeQueue.push(newNode);
-            visited.insert(childState);
+        if (visited.count(childState) == 0) {
+          nodeQueue.push(newNode);
+          visited.insert(childState);
         }
       }
     }
@@ -121,4 +125,3 @@ int estimative(State state, Target target) {
   else
     return 2;
 }
-
