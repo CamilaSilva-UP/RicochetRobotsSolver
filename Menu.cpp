@@ -9,6 +9,19 @@ static const uint8_t *getGlyph(char uc) {
     static const uint8_t dash[7] = {0x00,0x00,0x00,0x1F,0x00,0x00,0x00};
     return dash;
   }
+  static const uint8_t D[10][7] = {
+    {0x0E,0x11,0x11,0x11,0x11,0x11,0x0E}, // 0
+    {0x04,0x0C,0x04,0x04,0x04,0x04,0x0E}, // 1
+    {0x0E,0x11,0x01,0x06,0x08,0x10,0x1F}, // 2
+    {0x0E,0x11,0x01,0x06,0x01,0x11,0x0E}, // 3
+    {0x11,0x11,0x11,0x1F,0x01,0x01,0x01}, // 4
+    {0x1F,0x10,0x1E,0x01,0x01,0x11,0x0E}, // 5
+    {0x0E,0x10,0x10,0x1E,0x11,0x11,0x0E}, // 6
+    {0x1F,0x01,0x02,0x04,0x04,0x04,0x04}, // 7
+    {0x0E,0x11,0x11,0x0E,0x11,0x11,0x0E}, // 8
+    {0x0E,0x11,0x11,0x0F,0x01,0x11,0x0E}, // 9
+  };
+  if (uc >= '0' && uc <= '9') return D[uc - '0'];
   static const uint8_t G[27][7] = {
     {0x00,0x00,0x00,0x00,0x00,0x00,0x00}, // espaço
     {0x0E,0x11,0x11,0x1F,0x11,0x11,0x11}, // A
@@ -417,6 +430,52 @@ void drawBestSolutionBanner(sf::RenderWindow &window, float boardCx, float banne
   window.draw(bar);
 
   drawPixelTextCentered(window, "BEST SOLUTION - AI", boardCx, bannerY + 25.f, 4.f, sf::Color(210, 100, 20));
+}
+
+// banner de rating
+
+void drawRatingBanner(sf::RenderWindow &window, const std::string &rating,
+                      int playerMoves, int aiMoves,
+                      float boardCx, float boardCy) {
+  //  overlay sobre o tabuleiro
+  sf::RectangleShape overlay({1400.f, 1400.f});
+  overlay.setPosition({boardCx - 700.f, boardCy - 700.f});
+  overlay.setFillColor(sf::Color(0, 0, 0, 140));
+  window.draw(overlay);
+
+  float pw = 560.f, ph = 240.f;
+  float px = boardCx - pw / 2.f, py = boardCy - ph / 2.f;
+
+  sf::RectangleShape panel({pw, ph});
+  panel.setPosition({px, py});
+  panel.setFillColor(sf::Color(25, 25, 35));
+  panel.setOutlineThickness(5.f);
+  panel.setOutlineColor(sf::Color(210, 100, 20));
+  window.draw(panel);
+
+  // "A TUA SOLUCAO "
+  std::string playerLine = "A TUA SOLUCAO - " + std::to_string(playerMoves);
+  drawPixelTextCentered(window, playerLine, boardCx, py + 38.f, 3.f, sf::Color(200, 200, 200));
+
+  // linha separadora laranja
+  sf::RectangleShape sep({pw - 40.f, 3.f});
+  sep.setFillColor(sf::Color(210, 100, 20));
+  sep.setPosition({px + 20.f, py + 72.f});
+  window.draw(sep);
+
+  // "SOLUCAO DA AI "
+  std::string aiLine = "SOLUCAO DA AI - " + std::to_string(aiMoves);
+  drawPixelTextCentered(window, aiLine, boardCx, py + 100.f, 3.f, sf::Color(160, 160, 160));
+
+  // cor consoante o rating
+  sf::Color ratingColor;
+  if (rating == "PERFEITO")            ratingColor = sf::Color(0, 220, 80);
+  else if (rating == "QUASE PERFEITO") ratingColor = sf::Color(160, 230, 0);
+  else if (rating == "MUITO BOM")      ratingColor = sf::Color(230, 220, 0);
+  else if (rating == "BOM")            ratingColor = sf::Color(230, 140, 0);
+  else                                 ratingColor = sf::Color(220, 60, 60);
+
+  drawPixelTextCentered(window, rating, boardCx, py + 175.f, 3.f, ratingColor);
 }
 
 // click logic

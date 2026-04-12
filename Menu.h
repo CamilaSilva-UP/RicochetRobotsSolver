@@ -22,7 +22,10 @@ void drawAIButton(sf::RenderWindow &window, float x, float y, float w, float h, 
 // bannerzinho em baixo
 void drawBestSolutionBanner(sf::RenderWindow &window, float boardCx, float bannerY, float boardW);
 
-// botão reset com texto
+// banner de rating da solucao do jogador
+void drawRatingBanner(sf::RenderWindow &window, const std::string &rating, int playerMoves, int aiMoves, float boardCx, float boardCy);
+
+// botão reset
 void drawResetButton(sf::RenderWindow &window, float x, float y, float w, float h, bool isHov);
 
 // botão hint

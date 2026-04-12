@@ -192,6 +192,12 @@ int main() {
   int hintDx = 0, hintDy = 0;
   bool runHintBtn = false;
 
+  bool showRatingBanner = false;
+  bool pendingRating = false;
+  std::string ratingText = "";
+  int ratingPlayerMoves = 0;
+  int ratingAIMoves = 0;
+
   while (window.isOpen()) {
     if (showAISolution) {
       if (curSolutionState < (int)solution.size()) {
@@ -210,6 +216,10 @@ int main() {
       } else {
         //AI sol done
         showAISolution = false;
+        if (pendingRating) {
+          showRatingBanner = true;
+          pendingRating = false;
+        }
       }
     }
     while (auto event = window.pollEvent()) {
@@ -294,6 +304,8 @@ int main() {
             curSolutionState = 0;
             runAIAfterDraw = false;
             showBestSolutionBanner = false;
+            showRatingBanner = false;
+            pendingRating = false;
             showHint = false;
             targetN = (int)(std::mt19937{std::random_device{}()}() %
                             allTargets.size());
@@ -458,6 +470,13 @@ int main() {
                     hintDx, hintDy, cellSize, offset);
     }
 
+    // rating banner da solucao do jogador
+    if (showRatingBanner) {
+      float boardCx = offset + board.getWidth() * cellSize / 2.f;
+      float boardCy = offset + board.getHeight() * cellSize / 2.f;
+      drawRatingBanner(window, ratingText, ratingPlayerMoves, ratingAIMoves, boardCx, boardCy);
+    }
+
     // 5 sec thingy
     if (showAnnounce) {
       if (announceClock.getElapsedTime().asSeconds() < 5.f) {
@@ -473,28 +492,60 @@ int main() {
 
     if (runAIAfterDraw) {
      //won now showing best sol
+      int savedPlayerMoves = moveCount;
       aiCounterOffset = 0;
       moveCount = 0;
       solution = aStar(initialState, allTargets[targetN]).path;
+      int optimalMoves = (int)solution.size();
       solution.insert(solution.begin(), initialState);
       curSolutionState = 0;
       showAISolution = true;
       showBestSolutionBanner = true;
+      showRatingBanner = false;
       runAIAfterDraw = false;
+
+      // compara jogadas do player vs solucao otima
+      int diff = savedPlayerMoves - optimalMoves;
+      if (diff <= 0)      ratingText = "PERFEITO";
+      else if (diff == 1) ratingText = "QUASE PERFEITO";
+      else if (diff <= 3) ratingText = "MUITO BOM";
+      else if (diff <= 6) ratingText = "BOM";
+      else                ratingText = "VAI SER MELHOR NA PROXIMA";
+      ratingPlayerMoves = savedPlayerMoves;
+      ratingAIMoves = optimalMoves;
+      pendingRating = true;
     }
     if (runAISolverBtn) {
       if (moveCount == 0) {
-        //mostra a melhor solucao desde o inicio pq ainda nao ha moves
+        //mostra a melhor solucao desde o inicio
         aiCounterOffset = 0;
         aiPhase2Pending = false;
         solution = aStar(initialState, allTargets[targetN]).path;
         solution.insert(solution.begin(), initialState);
+        pendingRating = false;
+        showRatingBanner = false;
       } else {
-       // mostra melhor sol de onde esta
+        // mostra melhor sol de onde esta
         aiCounterOffset = moveCount;
         aiPhase2Pending = true;
         solution = aStar(state, allTargets[targetN]).path;
+        int aiRemainingMoves = (int)solution.size();
         solution.insert(solution.begin(), state);
+
+        SolverResult optResult = aStar(initialState, allTargets[targetN]);
+        int optimalMoves = (int)optResult.path.size();
+        int totalMoves = moveCount + aiRemainingMoves;
+
+        int diff = totalMoves - optimalMoves;
+        if (diff <= 0)      ratingText = "PERFEITO";
+        else if (diff == 1) ratingText = "QUASE PERFEITO";
+        else if (diff <= 3) ratingText = "MUITO BOM";
+        else if (diff <= 6) ratingText = "BOM";
+        else                ratingText = "VAI SER MELHOR NA PROXIMA";
+        ratingPlayerMoves = totalMoves;
+        ratingAIMoves = optimalMoves;
+        pendingRating = true;
+        showRatingBanner = false;
       }
       curSolutionState = 0;
       showAISolution = true;
