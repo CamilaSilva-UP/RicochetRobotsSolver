@@ -421,7 +421,7 @@ int main() {
       // Ganhou jogando: reset contador, mostra solução ótima do início
       aiCounterOffset = 0;
       moveCount = 0;
-      solution = aStar(initialState, allTargets[targetN]);
+      solution = aStar(initialState, allTargets[targetN]).path;
       solution.insert(solution.begin(), initialState);
       curSolutionState = 0;
       showAISolution = true;
@@ -432,14 +432,14 @@ int main() {
         // Caso 2: sem movimentos - mostra solução ótima do início
         aiCounterOffset = 0;
         aiPhase2Pending = false;
-        solution = aStar(initialState, allTargets[targetN]);
+        solution = aStar(initialState, allTargets[targetN]).path;
         solution.insert(solution.begin(), initialState);
       } else {
         // Caso 3: com movimentos - continua a partir do estado atual,
         // depois mostra solução ótima do início
         aiCounterOffset = moveCount;
         aiPhase2Pending = true;
-        solution = aStar(state, allTargets[targetN]);
+        solution = aStar(state, allTargets[targetN]).path;
         solution.insert(solution.begin(), state);
       }
       curSolutionState = 0;
@@ -449,7 +449,7 @@ int main() {
     if (runPhase2) {
       // Fase 2: mostra solução ótima do estado inicial
       aiCounterOffset = 0;
-      solution = aStar(initialState, allTargets[targetN]);
+      solution = aStar(initialState, allTargets[targetN]).path;
       solution.insert(solution.begin(), initialState);
       curSolutionState = 0;
       showAISolution = true;

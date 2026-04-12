@@ -6,9 +6,9 @@
 #include <unistd.h>
 #include <vector>
 
-std::vector<State> bfs(State initialState, Target target) {
+SolverResult bfs(State initialState, Target target) {
   std::deque<std::vector<State>> queue;
-  std::vector<State> visited;
+  std::set<State> visited;
   std::vector<Color> colors;
   switch (target.color) {
   case Red:
@@ -27,54 +27,40 @@ std::vector<State> bfs(State initialState, Target target) {
   std::vector<Direction> directions = {Direction::LEFT, Direction::RIGHT,
                                        Direction::DOWN, Direction::UP};
   queue.push_back({initialState});
-  visited.push_back(initialState);
+  visited.insert(initialState);
   Controller controller;
+  int nodesExpanded = 0;
 
   while (!queue.empty()) {
     std::vector<State> path = queue.front();
     queue.pop_front();
+    nodesExpanded++;
 
     State node = path.back();
-    // node.print();
-    // printf("Path size: %zu\n", path.size());
     if (node.checkWin(target.color, target.pos)) {
-      return path;
+      return {path, nodesExpanded};
     }
 
-#pragma omp parallel for collapse(2)
     for (Color color : colors) {
       for (Direction direction : directions) {
         State newState = controller.moveRobot(node, color, direction);
-        bool skip = false;
-        for (State s : visited) {
-          if (s == newState) {
-            skip = true;
-            break;
-          }
-        }
-        if (!skip) {
+        if (visited.find(newState) == visited.end()) {
           std::vector<State> new_path = path;
           new_path.push_back(newState);
           queue.push_back(new_path);
-          visited.push_back(newState);
+          visited.insert(newState);
         }
       }
     }
   }
+  return {{}, nodesExpanded};
 }
 
-bool operator>(Node const &n1, Node const &n2) { return n1.f > n2.f; }
-
-void printNode(Node node) {
-  node.state.print();
-  printf("%d\n", node.currentCost);
-  printf("%d\n", node.estimateToGoal);
-}
-
-std::vector<State> aStar(State initialState, Target target) {
+SolverResult aStar(State initialState, Target target) {
   Controller controller;
   std::priority_queue<Node, std::vector<Node>, std::greater<Node>> nodeQueue;
   std::set<State> visited;
+  int nodesExpanded = 0;
 
   Node root = {initialState,
                {},
@@ -87,7 +73,7 @@ std::vector<State> aStar(State initialState, Target target) {
   while (!nodeQueue.empty()) {
     Node toExplore = nodeQueue.top();
     nodeQueue.pop();
-    // printNode(toExplore);
+    nodesExpanded++;
 
     for (int color = 0; color < 4; color++) {
       for (int direction = 0; direction < 4; direction++) {
@@ -102,8 +88,8 @@ std::vector<State> aStar(State initialState, Target target) {
         Node newNode = {childState, newPath, childCost, estimativeToGoal,
                         childCost + estimativeToGoal};
         if (childState.checkWin(target.color, target.pos))
-          return newPath;
-        bool skip = false;
+          return {newPath, nodesExpanded};
+
         if (visited.count(childState) == 0) {
           nodeQueue.push(newNode);
           visited.insert(childState);
@@ -112,7 +98,7 @@ std::vector<State> aStar(State initialState, Target target) {
     }
   }
 
-  return {};
+  return {{}, nodesExpanded};
 }
 
 int estimative(State state, Target target) {
