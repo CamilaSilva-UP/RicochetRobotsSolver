@@ -12,7 +12,7 @@
 #include <random>
 #include <unistd.h>
 
-//contador logic
+// contador logic
 static const bool DIGITS[10][7] = {
     {true, true, true, true, true, true, false},     // 0
     {false, true, true, false, false, false, false}, // 1
@@ -49,7 +49,6 @@ void drawDigit(sf::RenderWindow &window, int digit, float x, float y, float h) {
   //  7
   // 5 3
   //  4
-
 
   sf::RectangleShape top(sf::Vector2f(sl, sw));
   top.setPosition({x + gap, y});
@@ -94,16 +93,8 @@ int main() {
   Board board(16, 16);
 
   auto quadrants = getQuadrants();
-  std::shuffle(quadrants.begin(), quadrants.end(),
-               std::mt19937{std::random_device{}()});
-
   std::vector<std::pair<int, int>> positions = {{0, 0}, {8, 0}, {8, 8}, {0, 8}};
   std::vector<int> rotations = {0, 90, 180, 270};
-
-  for (int i = 0; i < 4 && i < (int)quadrants.size(); i++) {
-    board.placeQuadrant(rotateQuadrant(quadrants[i], rotations[i]),
-                        positions[i].first, positions[i].second);
-  }
 
   Robot redRobot, greenRobot, blueRobot, yellowRobot;
   redRobot.setPos({1, 1});
@@ -121,20 +112,34 @@ int main() {
 
   std::vector<Position> validPositions;
 
-  for (auto wall : board.getWalls()) {
-    if (((wall.pos.x == 7 || wall.pos.x == 8) &&
-         (wall.pos.y == 7 || wall.pos.y == 8)) ||
-        ((wall.pos.x == 1 || wall.pos.x == 14) &&
-         (wall.pos.y == 1 || wall.pos.y == 14))) {
-      continue;
-    }
-    bool up = board.hasWall(wall.pos.x, wall.pos.y, 0, -1);
-    bool down = board.hasWall(wall.pos.x, wall.pos.y, 0, 1);
-    bool left = board.hasWall(wall.pos.x, wall.pos.y, -1, 0);
-    bool right = board.hasWall(wall.pos.x, wall.pos.y, 1, 0);
+  while (validPositions.size() < 4) {
+    board = Board(16, 16);
+    std::shuffle(quadrants.begin(), quadrants.end(),
+                 std::mt19937{std::random_device{}()});
 
-    if ((up && left) || (up && right) || (down && left) || (down && right)) {
-      validPositions.push_back(wall.pos);
+    for (int i = 0; i < 4 && i < (int)quadrants.size(); i++) {
+      board.placeQuadrant(rotateQuadrant(quadrants[i], rotations[i]),
+                          positions[i].first, positions[i].second);
+    }
+
+    state = State(board, redRobot, greenRobot, blueRobot, yellowRobot);
+    initialState = state;
+
+    for (auto wall : board.getWalls()) {
+      if (((wall.pos.x == 7 || wall.pos.x == 8) &&
+           (wall.pos.y == 7 || wall.pos.y == 8)) ||
+          ((wall.pos.x == 1 || wall.pos.x == 14) &&
+           (wall.pos.y == 1 || wall.pos.y == 14))) {
+        continue;
+      }
+      bool up = board.hasWall(wall.pos.x, wall.pos.y, 0, -1);
+      bool down = board.hasWall(wall.pos.x, wall.pos.y, 0, 1);
+      bool left = board.hasWall(wall.pos.x, wall.pos.y, -1, 0);
+      bool right = board.hasWall(wall.pos.x, wall.pos.y, 1, 0);
+
+      if ((up && left) || (up && right) || (down && left) || (down && right)) {
+        validPositions.push_back(wall.pos);
+      }
     }
   }
 
@@ -154,7 +159,8 @@ int main() {
   float panelWidth = 200.0f;
   unsigned int winW =
       (unsigned int)(offset * 2 + board.getWidth() * cellSize + panelWidth);
-  unsigned int winH = (unsigned int)(offset * 2 + board.getHeight() * cellSize + 60);
+  unsigned int winH =
+      (unsigned int)(offset * 2 + board.getHeight() * cellSize + 60);
   sf::RenderWindow window(sf::VideoMode({winW, winH}), "Ricochet Robots!");
 
   Screen currentScreen = Screen::MENU;
@@ -162,7 +168,7 @@ int main() {
   int moveCount = 0;
   Color selectedColor = Color::Red;
 
-  //butons colrs and posix
+  // butons colrs and posix
   float panelX = offset * 2 + board.getWidth() * cellSize;
   float btnW = 160.0f;
   float btnH = 50.0f;
@@ -206,7 +212,7 @@ int main() {
         curSolutionState++;
         sleep(1);
       } else if (aiPhase2Pending) {
-        //phase 1 done
+        // phase 1 done
         sleep(1);
         aiPhase2Pending = false;
         showAISolution = false;
@@ -214,7 +220,7 @@ int main() {
         moveCount = 0;
         runPhase2 = true;
       } else {
-        //AI sol done
+        // AI sol done
         showAISolution = false;
         if (pendingRating) {
           showRatingBanner = true;
@@ -251,38 +257,41 @@ int main() {
           float bx = panelX + 20.0f;
           float by = btnsY + 50 + 4 * (btnH + btnSpacing);
           if (mx >= bx && mx <= bx + btnW && my >= by && my <= by + btnH) {
-            board = Board(16, 16);
-            std::shuffle(quadrants.begin(), quadrants.end(),
-                         std::mt19937{std::random_device{}()});
-
-            for (int i = 0; i < 4 && i < (int)quadrants.size(); i++) {
-              board.placeQuadrant(rotateQuadrant(quadrants[i], rotations[i]),
-                                  positions[i].first, positions[i].second);
-            }
-            redRobot.setPos({1, 1});
-            greenRobot.setPos({14, 1});
-            blueRobot.setPos({1, 14});
-            yellowRobot.setPos({14, 14});
-
-            state = State(board, redRobot, greenRobot, blueRobot, yellowRobot);
-            initialState = state;
-
             validPositions.clear();
-            for (auto wall : board.getWalls()) {
-              if (((wall.pos.x == 7 || wall.pos.x == 8) &&
-                   (wall.pos.y == 7 || wall.pos.y == 8)) ||
-                  ((wall.pos.x == 1 || wall.pos.x == 14) &&
-                   (wall.pos.y == 1 || wall.pos.y == 14))) {
-                continue;
-              }
-              bool up = board.hasWall(wall.pos.x, wall.pos.y, 0, -1);
-              bool down = board.hasWall(wall.pos.x, wall.pos.y, 0, 1);
-              bool left = board.hasWall(wall.pos.x, wall.pos.y, -1, 0);
-              bool right = board.hasWall(wall.pos.x, wall.pos.y, 1, 0);
+            while (validPositions.size() < 4) {
+              board = Board(16, 16);
+              std::shuffle(quadrants.begin(), quadrants.end(),
+                           std::mt19937{std::random_device{}()});
 
-              if ((up && left) || (up && right) || (down && left) ||
-                  (down && right)) {
-                validPositions.push_back(wall.pos);
+              for (int i = 0; i < 4 && i < (int)quadrants.size(); i++) {
+                board.placeQuadrant(rotateQuadrant(quadrants[i], rotations[i]),
+                                    positions[i].first, positions[i].second);
+              }
+              redRobot.setPos({1, 1});
+              greenRobot.setPos({14, 1});
+              blueRobot.setPos({1, 14});
+              yellowRobot.setPos({14, 14});
+
+              state =
+                  State(board, redRobot, greenRobot, blueRobot, yellowRobot);
+              initialState = state;
+
+              for (auto wall : board.getWalls()) {
+                if (((wall.pos.x == 7 || wall.pos.x == 8) &&
+                     (wall.pos.y == 7 || wall.pos.y == 8)) ||
+                    ((wall.pos.x == 1 || wall.pos.x == 14) &&
+                     (wall.pos.y == 1 || wall.pos.y == 14))) {
+                  continue;
+                }
+                bool up = board.hasWall(wall.pos.x, wall.pos.y, 0, -1);
+                bool down = board.hasWall(wall.pos.x, wall.pos.y, 0, 1);
+                bool left = board.hasWall(wall.pos.x, wall.pos.y, -1, 0);
+                bool right = board.hasWall(wall.pos.x, wall.pos.y, 1, 0);
+
+                if ((up && left) || (up && right) || (down && left) ||
+                    (down && right)) {
+                  validPositions.push_back(wall.pos);
+                }
               }
             }
 
@@ -330,27 +339,31 @@ int main() {
 
       if (currentScreen == Screen::GAME)
         if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-          State prevState = state;
-          if (keyPressed->code == sf::Keyboard::Key::Up)
-            state = controller.moveRobot(state, selectedColor, Direction::UP);
-          else if (keyPressed->code == sf::Keyboard::Key::Down)
-            state = controller.moveRobot(state, selectedColor, Direction::DOWN);
-          else if (keyPressed->code == sf::Keyboard::Key::Left)
-            state = controller.moveRobot(state, selectedColor, Direction::LEFT);
-          else if (keyPressed->code == sf::Keyboard::Key::Right)
-            state =
-                controller.moveRobot(state, selectedColor, Direction::RIGHT);
+          if (!showAISolution) {
+            State prevState = state;
+            if (keyPressed->code == sf::Keyboard::Key::Up)
+              state = controller.moveRobot(state, selectedColor, Direction::UP);
+            else if (keyPressed->code == sf::Keyboard::Key::Down)
+              state =
+                  controller.moveRobot(state, selectedColor, Direction::DOWN);
+            else if (keyPressed->code == sf::Keyboard::Key::Left)
+              state =
+                  controller.moveRobot(state, selectedColor, Direction::LEFT);
+            else if (keyPressed->code == sf::Keyboard::Key::Right)
+              state =
+                  controller.moveRobot(state, selectedColor, Direction::RIGHT);
 
-          if (!(state.getRobot(selectedColor).getPos() ==
-                prevState.getRobot(selectedColor).getPos())) {
-            moveCount++;
-            showHint = false;
+            if (!(state.getRobot(selectedColor).getPos() ==
+                  prevState.getRobot(selectedColor).getPos())) {
+              moveCount++;
+              showHint = false;
 
-            if (state.checkWin(allTargets[targetN].color,
-                               allTargets[targetN].pos)) {
-              std::cout << "You reached the target in " << moveCount << " moves"
-                        << std::endl;
-              runAIAfterDraw = true;
+              if (state.checkWin(allTargets[targetN].color,
+                                 allTargets[targetN].pos)) {
+                std::cout << "You reached the target in " << moveCount
+                          << " moves" << std::endl;
+                runAIAfterDraw = true;
+              }
             }
           }
         }
@@ -402,7 +415,7 @@ int main() {
     state.getRobot(Color::Blue).draw(window, cellSize, offset);
     state.getRobot(Color::Yellow).draw(window, cellSize, offset);
 
-    //banner best sol
+    // banner best sol
     if (showBestSolutionBanner) {
       float boardW = board.getWidth() * cellSize;
       float boardCx = offset + boardW / 2.f;
@@ -447,12 +460,12 @@ int main() {
                     mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
                         my >= resetBtnY && my <= resetBtnY + btnH);
 
-    //goal indic
+    // goal indic
     float indicatorY = resetBtnY + btnH + 14.f;
     drawTargetIndicator(window, allTargets[targetN].color, panelX + 20.f,
                         indicatorY, btnW);
 
-    //ai solvr bttn
+    // ai solvr bttn
     float aiBtnY = indicatorY + 20.f + 28.f + 12.f;
     drawAIButton(window, panelX + 20.f, aiBtnY, btnW, btnH,
                  mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
@@ -474,7 +487,8 @@ int main() {
     if (showRatingBanner) {
       float boardCx = offset + board.getWidth() * cellSize / 2.f;
       float boardCy = offset + board.getHeight() * cellSize / 2.f;
-      drawRatingBanner(window, ratingText, ratingPlayerMoves, ratingAIMoves, boardCx, boardCy);
+      drawRatingBanner(window, ratingText, ratingPlayerMoves, ratingAIMoves,
+                       boardCx, boardCy);
     }
 
     // 5 sec thingy
@@ -491,7 +505,7 @@ int main() {
     window.display();
 
     if (runAIAfterDraw) {
-     //won now showing best sol
+      // won now showing best sol
       int savedPlayerMoves = moveCount;
       aiCounterOffset = 0;
       moveCount = 0;
@@ -506,18 +520,23 @@ int main() {
 
       // compara jogadas do player vs solucao otima
       int diff = savedPlayerMoves - optimalMoves;
-      if (diff <= 0)      ratingText = "PERFEITO";
-      else if (diff == 1) ratingText = "QUASE PERFEITO";
-      else if (diff <= 3) ratingText = "MUITO BOM";
-      else if (diff <= 6) ratingText = "BOM";
-      else                ratingText = "VAI SER MELHOR NA PROXIMA";
+      if (diff <= 0)
+        ratingText = "PERFEITO";
+      else if (diff == 1)
+        ratingText = "QUASE PERFEITO";
+      else if (diff <= 3)
+        ratingText = "MUITO BOM";
+      else if (diff <= 6)
+        ratingText = "BOM";
+      else
+        ratingText = "VAI SER MELHOR NA PROXIMA";
       ratingPlayerMoves = savedPlayerMoves;
       ratingAIMoves = optimalMoves;
       pendingRating = true;
     }
     if (runAISolverBtn) {
       if (moveCount == 0) {
-        //mostra a melhor solucao desde o inicio
+        // mostra a melhor solucao desde o inicio
         aiCounterOffset = 0;
         aiPhase2Pending = false;
         solution = aStar(initialState, allTargets[targetN]).path;
@@ -537,11 +556,16 @@ int main() {
         int totalMoves = moveCount + aiRemainingMoves;
 
         int diff = totalMoves - optimalMoves;
-        if (diff <= 0)      ratingText = "PERFEITO";
-        else if (diff == 1) ratingText = "QUASE PERFEITO";
-        else if (diff <= 3) ratingText = "MUITO BOM";
-        else if (diff <= 6) ratingText = "BOM";
-        else                ratingText = "VAI SER MELHOR NA PROXIMA";
+        if (diff <= 0)
+          ratingText = "PERFEITO";
+        else if (diff == 1)
+          ratingText = "QUASE PERFEITO";
+        else if (diff <= 3)
+          ratingText = "MUITO BOM";
+        else if (diff <= 6)
+          ratingText = "BOM";
+        else
+          ratingText = "VAI SER MELHOR NA PROXIMA";
         ratingPlayerMoves = totalMoves;
         ratingAIMoves = optimalMoves;
         pendingRating = true;
@@ -575,10 +599,14 @@ int main() {
             hintDx = p1.x - p0.x;
             hintDy = p1.y - p0.y;
             // normalizar para -1/0/1
-            if (hintDx > 1)  hintDx = 1;
-            if (hintDx < -1) hintDx = -1;
-            if (hintDy > 1)  hintDy = 1;
-            if (hintDy < -1) hintDy = -1;
+            if (hintDx > 1)
+              hintDx = 1;
+            if (hintDx < -1)
+              hintDx = -1;
+            if (hintDy > 1)
+              hintDy = 1;
+            if (hintDy < -1)
+              hintDy = -1;
             showHint = true;
             break;
           }
