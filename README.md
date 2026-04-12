@@ -32,7 +32,7 @@ You can access the How to Play screen from the main menu of the game! But here a
   - If you didn't do any moves, it will display the optimal solution
   - If you already did some moves, it will display the optimal solution **from the current position**, and then display the most optimal solution from the beginning
 
-![](assets/RicochetPreview.png)
+![](assets/RicochetPreview.gif)
 
 Have fun!
 
