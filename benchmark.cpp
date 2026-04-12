@@ -11,7 +11,7 @@
 #include <random>
 #include <vector>
 
-// Gera um tabuleiro aleatório com robots nas posições iniciais fixas
+// Random boards
 static State makeRandomState(std::mt19937 &rng) {
   Board board(16, 16);
   auto quadrants = getQuadrants();
@@ -32,14 +32,14 @@ static State makeRandomState(std::mt19937 &rng) {
   return State(board, r, g, b, y);
 }
 
-// Recolhe targets válidos (cantos de parede, longe do centro e das posições iniciais)
+// choses random targets
 static std::vector<Target> getValidTargets(Board &board) {
   std::vector<Color> colors = {Color::Red, Color::Green, Color::Blue, Color::Yellow};
   std::vector<Target> targets;
 
   for (auto &wall : board.getWalls()) {
     int x = wall.pos.x, y = wall.pos.y;
-    // Excluir zona central e posições iniciais dos robots
+    // excludes center and initial positions
     if ((x == 7 || x == 8) && (y == 7 || y == 8)) continue;
     if ((x == 1 || x == 14) && (y == 1 || y == 14)) continue;
 
@@ -57,9 +57,8 @@ static std::vector<Target> getValidTargets(Board &board) {
 }
 
 int main() {
-  const int NUM_BOARDS  = 20;   // tabuleiros distintos
-  const int TARGETS_PER_BOARD = 5;  // targets por tabuleiro
-
+  const int NUM_BOARDS  = 20;
+  const int TARGETS_PER_BOARD = 5;
   std::mt19937 rng(42); // semente fixa para reprodutibilidade
 
   printf("board,target,color,opt_moves,bfs_nodes,bfs_ms,astar_nodes,astar_ms\n");
