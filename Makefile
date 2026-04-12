@@ -1,7 +1,7 @@
 all: compile link clean
 
 compile:
-	g++ -g -c *.cpp
+	g++ -c *.cpp
 link:
 	g++ *.o -o Ricochet -lsfml-graphics -lsfml-window -lsfml-system  -fopenmp	
 

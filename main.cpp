@@ -179,7 +179,7 @@ int main() {
   bool runAISolverBtn = false;
   bool runPhase2 = false;
   bool aiPhase2Pending = false;
-  int  aiCounterOffset = 0;
+  int aiCounterOffset = 0;
 
   while (window.isOpen()) {
     if (showAISolution) {
@@ -190,11 +190,12 @@ int main() {
         sleep(1);
       } else if (aiPhase2Pending) {
         // Fase 1 terminada: reset ao estado inicial e arranca fase 2
+        sleep(1);
         aiPhase2Pending = false;
-        showAISolution  = false;
-        state           = initialState;
-        moveCount       = 0;
-        runPhase2       = true;
+        showAISolution = false;
+        state = initialState;
+        moveCount = 0;
+        runPhase2 = true;
       }
     }
     while (auto event = window.pollEvent()) {
@@ -208,9 +209,11 @@ int main() {
           float my = (float)mouseClick->position.y;
           if (currentScreen != Screen::GAME) {
             Screen prev = currentScreen;
-            currentScreen = handleMenuClick(currentScreen, mx, my, (float)winW, (float)winH);
+            currentScreen = handleMenuClick(currentScreen, mx, my, (float)winW,
+                                            (float)winH);
             if (prev == Screen::MENU && currentScreen == Screen::GAME) {
-              targetN = (int)(std::mt19937{std::random_device{}()}() % allTargets.size());
+              targetN = (int)(std::mt19937{std::random_device{}()}() %
+                              allTargets.size());
               showAnnounce = true;
               announceClock.restart();
             }
@@ -276,41 +279,46 @@ int main() {
             solution.clear();
             curSolutionState = 0;
             runAIAfterDraw = false;
-            targetN = (int)(std::mt19937{std::random_device{}()}() % allTargets.size());
+            targetN = (int)(std::mt19937{std::random_device{}()}() %
+                            allTargets.size());
             showAnnounce = true;
             announceClock.restart();
           }
           // Botão AI Solver
-          float aiBtnY = btnsY + 50 + 4*(btnH+btnSpacing) + btnH + 14.f + 20.f + 28.f + 12.f;
-          if (mx >= panelX+20.f && mx <= panelX+20.f+btnW &&
-              my >= aiBtnY     && my <= aiBtnY + btnH) {
+          float aiBtnY = btnsY + 50 + 4 * (btnH + btnSpacing) + btnH + 14.f +
+                         20.f + 28.f + 12.f;
+          if (mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
+              my >= aiBtnY && my <= aiBtnY + btnH) {
             runAISolverBtn = true;
           }
         }
       }
 
       if (currentScreen == Screen::GAME)
-      if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-        State prevState = state;
-        if (keyPressed->code == sf::Keyboard::Key::Up)
-          state = controller.moveRobot(state, selectedColor, Direction::UP);
-        else if (keyPressed->code == sf::Keyboard::Key::Down)
-          state = controller.moveRobot(state, selectedColor, Direction::DOWN);
-        else if (keyPressed->code == sf::Keyboard::Key::Left)
-          state = controller.moveRobot(state, selectedColor, Direction::LEFT);
-        else if (keyPressed->code == sf::Keyboard::Key::Right)
-          state = controller.moveRobot(state, selectedColor, Direction::RIGHT);
+        if (const auto *keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+          State prevState = state;
+          if (keyPressed->code == sf::Keyboard::Key::Up)
+            state = controller.moveRobot(state, selectedColor, Direction::UP);
+          else if (keyPressed->code == sf::Keyboard::Key::Down)
+            state = controller.moveRobot(state, selectedColor, Direction::DOWN);
+          else if (keyPressed->code == sf::Keyboard::Key::Left)
+            state = controller.moveRobot(state, selectedColor, Direction::LEFT);
+          else if (keyPressed->code == sf::Keyboard::Key::Right)
+            state =
+                controller.moveRobot(state, selectedColor, Direction::RIGHT);
 
-        if (!(state.getRobot(selectedColor).getPos() ==
-              prevState.getRobot(selectedColor).getPos())) {
-          moveCount++;
+          if (!(state.getRobot(selectedColor).getPos() ==
+                prevState.getRobot(selectedColor).getPos())) {
+            moveCount++;
 
-          if (state.checkWin(allTargets[targetN].color, allTargets[targetN].pos)) {
-            std::cout << "You reached the target in " << moveCount << " moves" << std::endl;
-            runAIAfterDraw = true;
+            if (state.checkWin(allTargets[targetN].color,
+                               allTargets[targetN].pos)) {
+              std::cout << "You reached the target in " << moveCount << " moves"
+                        << std::endl;
+              runAIAfterDraw = true;
+            }
           }
         }
-      }
     }
 
     auto mousePos = sf::Mouse::getPosition(window);
@@ -341,12 +349,16 @@ int main() {
     {
       const auto &target = allTargets[targetN];
       sf::RectangleShape targetShape(sf::Vector2f(cellSize, cellSize));
-      targetShape.setPosition({offset + target.pos.x * cellSize,
-                               offset + target.pos.y * cellSize});
-      if      (target.color == Color::Red)    targetShape.setFillColor(sf::Color(255,   0,   0, 180));
-      else if (target.color == Color::Green)  targetShape.setFillColor(sf::Color(  0, 200,   0, 180));
-      else if (target.color == Color::Blue)   targetShape.setFillColor(sf::Color(  0,   0, 255, 180));
-      else if (target.color == Color::Yellow) targetShape.setFillColor(sf::Color(255, 220,   0, 180));
+      targetShape.setPosition(
+          {offset + target.pos.x * cellSize, offset + target.pos.y * cellSize});
+      if (target.color == Color::Red)
+        targetShape.setFillColor(sf::Color(255, 0, 0, 180));
+      else if (target.color == Color::Green)
+        targetShape.setFillColor(sf::Color(0, 200, 0, 180));
+      else if (target.color == Color::Blue)
+        targetShape.setFillColor(sf::Color(0, 0, 255, 180));
+      else if (target.color == Color::Yellow)
+        targetShape.setFillColor(sf::Color(255, 220, 0, 180));
       window.draw(targetShape);
     }
 
@@ -395,19 +407,19 @@ int main() {
     // Indicador permanente do alvo abaixo do botão magenta
     float resetBtnY = btnsY + 50 + 4 * (btnH + btnSpacing);
     float indicatorY = resetBtnY + btnH + 14.f;
-    drawTargetIndicator(window, allTargets[targetN].color,
-                        panelX + 20.f, indicatorY, btnW);
+    drawTargetIndicator(window, allTargets[targetN].color, panelX + 20.f,
+                        indicatorY, btnW);
 
     // Botão AI Solver
     float aiBtnY = indicatorY + 20.f + 28.f + 12.f;
     drawAIButton(window, panelX + 20.f, aiBtnY, btnW, btnH,
-                 mx >= panelX+20.f && mx <= panelX+20.f+btnW &&
-                 my >= aiBtnY && my <= aiBtnY+btnH);
+                 mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
+                     my >= aiBtnY && my <= aiBtnY + btnH);
 
     // Anúncio de 5 segundos
     if (showAnnounce) {
       if (announceClock.getElapsedTime().asSeconds() < 5.f) {
-        float boardCx = offset + board.getWidth()  * cellSize / 2.f;
+        float boardCx = offset + board.getWidth() * cellSize / 2.f;
         float boardCy = offset + board.getHeight() * cellSize / 2.f;
         drawGameAnnounce(window, allTargets[targetN].color, boardCx, boardCy);
       } else {
