@@ -35,3 +35,20 @@ You can access the How to Play screen from the main menu of the game! But here a
 ![ricochet](https://github.com/user-attachments/assets/29c1957f-ef83-46a9-8b48-c702c61d5395)
 
 Have fun!
+
+------------
+
+### Benchmarking 
+
+The program comes with a simple bechmarking program, to test the times between a BFS implementation and a A* implementation for the AI bot. 
+
+First, compile it using:
+
+```
+make benchmark
+```
+And then run it:
+
+```
+./Benchmark
+```
