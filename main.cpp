@@ -12,8 +12,7 @@
 #include <random>
 #include <unistd.h>
 
-// 7-segment display: segments = {top, top-right, bottom-right, bottom,
-// bottom-left, top-left, middle}
+//contador logic
 static const bool DIGITS[10][7] = {
     {true, true, true, true, true, true, false},     // 0
     {false, true, true, false, false, false, false}, // 1
@@ -39,37 +38,43 @@ void drawDigit(sf::RenderWindow &window, int digit, float x, float y, float h) {
     window.draw(s);
   };
 
-  // top
+  //  -
+  // | |
+  //  -
+  // | |
+  //  -
+  //
+  //  1
+  // 6 2
+  //  7
+  // 5 3
+  //  4
+
+
   sf::RectangleShape top(sf::Vector2f(sl, sw));
   top.setPosition({x + gap, y});
   seg(top, DIGITS[digit][0] ? on : off);
 
-  // top-right
   sf::RectangleShape tr(sf::Vector2f(sw, sl));
   tr.setPosition({x + gap + sl, y + gap});
   seg(tr, DIGITS[digit][1] ? on : off);
 
-  // bottom-right
   sf::RectangleShape br(sf::Vector2f(sw, sl));
   br.setPosition({x + gap + sl, y + gap + sl + gap});
   seg(br, DIGITS[digit][2] ? on : off);
 
-  // bottom
   sf::RectangleShape bot(sf::Vector2f(sl, sw));
   bot.setPosition({x + gap, y + 2 * (gap + sl)});
   seg(bot, DIGITS[digit][3] ? on : off);
 
-  // bottom-left
   sf::RectangleShape bl(sf::Vector2f(sw, sl));
   bl.setPosition({x, y + gap + sl + gap});
   seg(bl, DIGITS[digit][4] ? on : off);
 
-  // top-left
   sf::RectangleShape tl(sf::Vector2f(sw, sl));
   tl.setPosition({x, y + gap});
   seg(tl, DIGITS[digit][5] ? on : off);
 
-  // middle
   sf::RectangleShape mid(sf::Vector2f(sl, sw));
   mid.setPosition({x + gap, y + gap + sl});
   seg(mid, DIGITS[digit][6] ? on : off);
@@ -149,7 +154,7 @@ int main() {
   float panelWidth = 200.0f;
   unsigned int winW =
       (unsigned int)(offset * 2 + board.getWidth() * cellSize + panelWidth);
-  unsigned int winH = (unsigned int)(offset * 2 + board.getHeight() * cellSize);
+  unsigned int winH = (unsigned int)(offset * 2 + board.getHeight() * cellSize + 60);
   sf::RenderWindow window(sf::VideoMode({winW, winH}), "Ricochet Robots!");
 
   Screen currentScreen = Screen::MENU;
@@ -157,7 +162,7 @@ int main() {
   int moveCount = 0;
   Color selectedColor = Color::Red;
 
-  // Botões: posições e cores
+  //butons colrs and posix
   float panelX = offset * 2 + board.getWidth() * cellSize;
   float btnW = 160.0f;
   float btnH = 50.0f;
@@ -180,6 +185,12 @@ int main() {
   bool runPhase2 = false;
   bool aiPhase2Pending = false;
   int aiCounterOffset = 0;
+  bool showBestSolutionBanner = false;
+
+  bool showHint = false;
+  Color hintColor = Color::Red;
+  int hintDx = 0, hintDy = 0;
+  bool runHintBtn = false;
 
   while (window.isOpen()) {
     if (showAISolution) {
@@ -189,13 +200,16 @@ int main() {
         curSolutionState++;
         sleep(1);
       } else if (aiPhase2Pending) {
-        // Fase 1 terminada: reset ao estado inicial e arranca fase 2
+        //phase 1 done
         sleep(1);
         aiPhase2Pending = false;
         showAISolution = false;
         state = initialState;
         moveCount = 0;
         runPhase2 = true;
+      } else {
+        //AI sol done
+        showAISolution = false;
       }
     }
     while (auto event = window.pollEvent()) {
@@ -279,17 +293,25 @@ int main() {
             solution.clear();
             curSolutionState = 0;
             runAIAfterDraw = false;
+            showBestSolutionBanner = false;
+            showHint = false;
             targetN = (int)(std::mt19937{std::random_device{}()}() %
                             allTargets.size());
             showAnnounce = true;
             announceClock.restart();
           }
-          // Botão AI Solver
+          // AI solvr buttn
           float aiBtnY = btnsY + 50 + 4 * (btnH + btnSpacing) + btnH + 14.f +
                          20.f + 28.f + 12.f;
           if (mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
               my >= aiBtnY && my <= aiBtnY + btnH) {
             runAISolverBtn = true;
+          }
+          // hint buttn
+          float hintBtnY = aiBtnY + btnH + 10.f;
+          if (mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
+              my >= hintBtnY && my <= hintBtnY + btnH) {
+            runHintBtn = true;
           }
         }
       }
@@ -310,6 +332,7 @@ int main() {
           if (!(state.getRobot(selectedColor).getPos() ==
                 prevState.getRobot(selectedColor).getPos())) {
             moveCount++;
+            showHint = false;
 
             if (state.checkWin(allTargets[targetN].color,
                                allTargets[targetN].pos)) {
@@ -367,6 +390,14 @@ int main() {
     state.getRobot(Color::Blue).draw(window, cellSize, offset);
     state.getRobot(Color::Yellow).draw(window, cellSize, offset);
 
+    //banner best sol
+    if (showBestSolutionBanner) {
+      float boardW = board.getWidth() * cellSize;
+      float boardCx = offset + boardW / 2.f;
+      float bannerY = offset + board.getHeight() * cellSize + 5.f;
+      drawBestSolutionBanner(window, boardCx, bannerY, boardW);
+    }
+
     // Painel lateral
     sf::RectangleShape panel(sf::Vector2f(panelWidth, (float)winH));
     panel.setPosition({panelX, 0});
@@ -381,7 +412,7 @@ int main() {
 
     drawNumber(window, moveCount, panelX + 20.0f, 50.0f, 80.0f);
 
-    // Botões de seleção de robot
+    // Botoes de selecao de robot
     for (int i = 0; i < 4; i++) {
       float bx = panelX + 20.0f;
       float by = btnsY + i * (btnH + btnSpacing);
@@ -399,24 +430,35 @@ int main() {
       window.draw(btn);
     }
 
-    sf::RectangleShape btn(sf::Vector2f(btnW, btnH));
-    btn.setPosition({panelX + 20.0f, btnsY + 50 + 4 * (btnH + btnSpacing)});
-    btn.setFillColor(sf::Color::Magenta);
-    window.draw(btn);
-
-    // Indicador permanente do alvo abaixo do botão magenta
     float resetBtnY = btnsY + 50 + 4 * (btnH + btnSpacing);
+    drawResetButton(window, panelX + 20.0f, resetBtnY, btnW, btnH,
+                    mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
+                        my >= resetBtnY && my <= resetBtnY + btnH);
+
+    //goal indic
     float indicatorY = resetBtnY + btnH + 14.f;
     drawTargetIndicator(window, allTargets[targetN].color, panelX + 20.f,
                         indicatorY, btnW);
 
-    // Botão AI Solver
+    //ai solvr bttn
     float aiBtnY = indicatorY + 20.f + 28.f + 12.f;
     drawAIButton(window, panelX + 20.f, aiBtnY, btnW, btnH,
                  mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
                      my >= aiBtnY && my <= aiBtnY + btnH);
 
-    // Anúncio de 5 segundos
+    // hint buttn
+    float hintBtnY = aiBtnY + btnH + 10.f;
+    drawHintButton(window, panelX + 20.f, hintBtnY, btnW, btnH,
+                   mx >= panelX + 20.f && mx <= panelX + 20.f + btnW &&
+                       my >= hintBtnY && my <= hintBtnY + btnH);
+
+    // seta de hint no tabuleiro
+    if (showHint) {
+      drawHintArrow(window, hintColor, state.getRobot(hintColor).getPos(),
+                    hintDx, hintDy, cellSize, offset);
+    }
+
+    // 5 sec thingy
     if (showAnnounce) {
       if (announceClock.getElapsedTime().asSeconds() < 5.f) {
         float boardCx = offset + board.getWidth() * cellSize / 2.f;
@@ -430,25 +472,25 @@ int main() {
     window.display();
 
     if (runAIAfterDraw) {
-      // Ganhou jogando: reset contador, mostra solução ótima do início
+     //won now showing best sol
       aiCounterOffset = 0;
       moveCount = 0;
       solution = aStar(initialState, allTargets[targetN]).path;
       solution.insert(solution.begin(), initialState);
       curSolutionState = 0;
       showAISolution = true;
+      showBestSolutionBanner = true;
       runAIAfterDraw = false;
     }
     if (runAISolverBtn) {
       if (moveCount == 0) {
-        // Caso 2: sem movimentos - mostra solução ótima do início
+        //mostra a melhor solucao desde o inicio pq ainda nao ha moves
         aiCounterOffset = 0;
         aiPhase2Pending = false;
         solution = aStar(initialState, allTargets[targetN]).path;
         solution.insert(solution.begin(), initialState);
       } else {
-        // Caso 3: com movimentos - continua a partir do estado atual,
-        // depois mostra solução ótima do início
+       // mostra melhor sol de onde esta
         aiCounterOffset = moveCount;
         aiPhase2Pending = true;
         solution = aStar(state, allTargets[targetN]).path;
@@ -456,16 +498,41 @@ int main() {
       }
       curSolutionState = 0;
       showAISolution = true;
+      showBestSolutionBanner = true;
       runAISolverBtn = false;
     }
     if (runPhase2) {
-      // Fase 2: mostra solução ótima do estado inicial
+      // solucao melhor desde o starting point
       aiCounterOffset = 0;
       solution = aStar(initialState, allTargets[targetN]).path;
       solution.insert(solution.begin(), initialState);
       curSolutionState = 0;
       showAISolution = true;
+      showBestSolutionBanner = true;
       runPhase2 = false;
+    }
+    if (runHintBtn) {
+      runHintBtn = false;
+      SolverResult hintResult = aStar(state, allTargets[targetN]);
+      if (!hintResult.path.empty()) {
+        State &nextState = hintResult.path[0];
+        for (Color c : {Color::Red, Color::Green, Color::Blue, Color::Yellow}) {
+          Position p0 = state.getRobot(c).getPos();
+          Position p1 = nextState.getRobot(c).getPos();
+          if (!(p0 == p1)) {
+            hintColor = c;
+            hintDx = p1.x - p0.x;
+            hintDy = p1.y - p0.y;
+            // normalizar para -1/0/1
+            if (hintDx > 1)  hintDx = 1;
+            if (hintDx < -1) hintDx = -1;
+            if (hintDy > 1)  hintDy = 1;
+            if (hintDy < -1) hintDy = -1;
+            showHint = true;
+            break;
+          }
+        }
+      }
     }
   }
 

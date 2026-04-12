@@ -3,9 +3,12 @@
 #include <string>
 #include <cctype>
 
-// ─── Pixel font 5×7 (mesmo estilo do display de números) ─────────────────────
 
 static const uint8_t *getGlyph(char uc) {
+  if (uc == '-') {
+    static const uint8_t dash[7] = {0x00,0x00,0x00,0x1F,0x00,0x00,0x00};
+    return dash;
+  }
   static const uint8_t G[27][7] = {
     {0x00,0x00,0x00,0x00,0x00,0x00,0x00}, // espaço
     {0x0E,0x11,0x11,0x1F,0x11,0x11,0x11}, // A
@@ -62,7 +65,7 @@ static void drawPixelTextCentered(sf::RenderWindow &w, const std::string &text,
   drawPixelText(w, text, cx - tw / 2.f, cy - 3.5f * ps, ps, color);
 }
 
-// ─── Geometria dos botões ─────────────────────────────────────────────────────
+// geometria dos buttons
 
 static constexpr float BTN_W = 300.f, BTN_H = 60.f, BTN_GAP = 16.f;
 static constexpr float BACK_W = 200.f, BACK_H = 50.f;
@@ -78,7 +81,6 @@ static bool hov(float mx, float my, float x, float y, float w, float h) {
   return mx >= x && mx <= x + w && my >= y && my <= y + h;
 }
 
-// Botão idêntico ao estilo do painel lateral do jogo
 static void drawBtn(sf::RenderWindow &w, const std::string &label,
                     float x, float y, float bw, float bh,
                     sf::Color color, bool isHov) {
@@ -96,7 +98,7 @@ static void drawBtn(sf::RenderWindow &w, const std::string &label,
                         sf::Color::White);
 }
 
-// ─── Ecrã de menu ────────────────────────────────────────────────────────────
+//menu
 
 void drawMenuScreen(sf::RenderWindow &window, float winW, float winH,
                     float mx, float my) {
@@ -107,7 +109,6 @@ void drawMenuScreen(sf::RenderWindow &window, float winW, float winH,
 
   float cx = winW / 2.f;
 
-  // Robots decorativos no topo (mesmo estilo do jogo)
   float ry0 = winH / 2.f - 2.5f * BTN_H - 80.f;
   float r = 20.f;
   std::vector<sf::Color> robotColors = {
@@ -119,7 +120,6 @@ void drawMenuScreen(sf::RenderWindow &window, float winW, float winH,
     window.draw(circle);
   }
 
-  // Separador horizontal (estilo das paredes do tabuleiro)
   sf::RectangleShape sep({BTN_W + 40.f, 4.f});
   sep.setFillColor(sf::Color(180, 180, 180));
   sep.setPosition({cx - (BTN_W + 40.f) / 2.f, ry0 + 2 * r + 20.f});
@@ -134,7 +134,7 @@ void drawMenuScreen(sf::RenderWindow &window, float winW, float winH,
           sf::Color::Green,  hov(mx, my, bx, btn3Y(winH), BTN_W, BTN_H));
 }
 
-// ─── Ecrã de controlos ───────────────────────────────────────────────────────
+// controls
 
 void drawControlsScreen(sf::RenderWindow &window, float winW, float winH,
                         float mx, float my) {
@@ -153,7 +153,6 @@ void drawControlsScreen(sf::RenderWindow &window, float winW, float winH,
   sep.setPosition({cx - (BTN_W + 40.f) / 2.f, startY + 30.f});
   window.draw(sep);
 
-  // Teclas de seta — 4 quadrados estilo teclado
   float ks = 50.f, kgap = 6.f;
   float kx = cx - ks * 1.5f - kgap;
   float ky = startY + 60.f;
@@ -179,13 +178,11 @@ void drawControlsScreen(sf::RenderWindow &window, float winW, float winH,
                           2.f, sf::Color::Black);
   }
 
-  // Descrição ao lado das setas
   float descX = kx + 3 * (ks + kgap) + 30.f;
   float descY = ky + 20.f;
   drawPixelText(window, "MOVER ROBOT", descX, descY,       3.f, sf::Color::Black);
   drawPixelText(window, "SELECIONADO", descX, descY + 30.f, 3.f, sf::Color::Black);
 
-  // Robots selecionáveis
   float ry2 = ky + 2 * (ks + kgap) + 50.f;
   drawPixelText(window, "CLICAR NO BOTAO", kx, ry2, 3.f, sf::Color::Black);
   drawPixelText(window, "SELECIONA O ROBOT DA COR DO MESMO", kx, ry2 + 26.f, 3.f, sf::Color::Black);
@@ -199,7 +196,7 @@ void drawControlsScreen(sf::RenderWindow &window, float winW, float winH,
     window.draw(rb);
   }
 
-  // Botão magenta = reset
+  // reset button
   float ry3 = ry2 + 115.f;
   drawPixelText(window, "BOTAO ROXO", kx, ry3, 3.f, sf::Color::Black);
   drawPixelText(window, "REINICIA JOGO", kx, ry3 + 26.f, 3.f, sf::Color::Black);
@@ -213,7 +210,7 @@ void drawControlsScreen(sf::RenderWindow &window, float winW, float winH,
           hov(mx, my, backX(winW), backY(winH), BACK_W, BACK_H));
 }
 
-// ─── Ecrã "como jogar" ───────────────────────────────────────────────────────
+// como jogar screen
 
 void drawHowToPlayScreen(sf::RenderWindow &window, float winW, float winH,
                           float mx, float my) {
@@ -256,7 +253,6 @@ void drawHowToPlayScreen(sf::RenderWindow &window, float winW, float winH,
           hov(mx, my, backX(winW), backY(winH), BACK_W, BACK_H));
 }
 
-// ─── Helpers de cor ──────────────────────────────────────────────────────────
 
 static sf::Color toSf(Color c) {
   switch (c) {
@@ -278,14 +274,13 @@ static const char *colorName(Color c) {
   return "";
 }
 
-// ─── Anúncio de target ───────────────────────────────────────────────────────
+// anouncer do targe
 
 void drawGameAnnounce(sf::RenderWindow &window, Color targetColor,
                       float boardCx, float boardCy) {
   float pw = 460.f, ph = 160.f;
   float px = boardCx - pw / 2.f, py = boardCy - ph / 2.f;
 
-  // Painel estilo jogo
   sf::RectangleShape panel({pw, ph});
   panel.setPosition({px, py});
   panel.setFillColor(sf::Color(240, 240, 240));
@@ -293,26 +288,22 @@ void drawGameAnnounce(sf::RenderWindow &window, Color targetColor,
   panel.setOutlineColor(sf::Color::Black);
   window.draw(panel);
 
-  // "LEVAR O ROBOT"
   drawPixelText(window, "LEVAR O ROBOT", px + 20.f, py + 20.f, 4.f, sf::Color::Black);
 
-  // Círculo colorido
   float cr = 26.f;
   sf::CircleShape circle(cr);
   circle.setFillColor(toSf(targetColor));
   circle.setPosition({px + 20.f, py + 70.f});
   window.draw(circle);
 
-  // Nome da cor
   drawPixelText(window, colorName(targetColor),
                 px + 20.f + cr * 2.f + 12.f, py + 78.f,
                 4.f, toSf(targetColor));
 
-  // "AO ALVO"
   drawPixelText(window, "AO ALVO", px + pw - 180.f, py + 78.f, 4.f, sf::Color::Black);
 }
 
-// ─── Indicador permanente no painel ──────────────────────────────────────────
+// alvo
 
 void drawTargetIndicator(sf::RenderWindow &window, Color targetColor,
                          float x, float y, float w) {
@@ -324,7 +315,7 @@ void drawTargetIndicator(sf::RenderWindow &window, Color targetColor,
   window.draw(bar);
 }
 
-// ─── Botão AI Solver ─────────────────────────────────────────────────────────
+// botaozinho do solver
 
 void drawAIButton(sf::RenderWindow &window, float x, float y, float w, float h, bool isHov) {
   sf::Color color(210, 100, 20); // laranja
@@ -342,7 +333,93 @@ void drawAIButton(sf::RenderWindow &window, float x, float y, float w, float h, 
   drawPixelText(window, "AI SOLVER", x + 8.f, y + h / 2.f - 10.f, 3.f, sf::Color::White);
 }
 
-// ─── Lógica de clique ────────────────────────────────────────────────────────
+// ─── Botão Reset ─────────────────────────────────────────────────────────────
+
+void drawResetButton(sf::RenderWindow &window, float x, float y, float w, float h, bool isHov) {
+  sf::Color color = sf::Color::Magenta;
+  if (isHov) {
+    sf::RectangleShape outline({w + 6.f, h + 6.f});
+    outline.setPosition({x - 3.f, y - 3.f});
+    outline.setFillColor(sf::Color::Black);
+    window.draw(outline);
+  }
+  sf::RectangleShape btn({w, h});
+  btn.setPosition({x, y});
+  btn.setFillColor(color);
+  window.draw(btn);
+  drawPixelTextCentered(window, "RESET", x + w / 2.f, y + h / 2.f, 4.f, sf::Color::White);
+}
+
+// ─── Botão Hint ──────────────────────────────────────────────────────────────
+
+void drawHintButton(sf::RenderWindow &window, float x, float y, float w, float h, bool isHov) {
+  sf::Color color(0, 150, 150);
+  if (isHov) {
+    sf::RectangleShape outline({w + 6.f, h + 6.f});
+    outline.setPosition({x - 3.f, y - 3.f});
+    outline.setFillColor(sf::Color::Black);
+    window.draw(outline);
+    color = sf::Color(0, 180, 180);
+  }
+  sf::RectangleShape btn({w, h});
+  btn.setPosition({x, y});
+  btn.setFillColor(color);
+  window.draw(btn);
+  drawPixelTextCentered(window, "HINT", x + w / 2.f, y + h / 2.f, 4.f, sf::Color::White);
+}
+
+// ─── Seta de Hint no tabuleiro ───────────────────────────────────────────────
+
+void drawHintArrow(sf::RenderWindow &window, Color robotColor, Position robotPos, int dx, int dy, float cellSize, float offset) {
+  float cx = offset + robotPos.x * cellSize + cellSize / 2.f;
+  float cy = offset + robotPos.y * cellSize + cellSize / 2.f;
+  float r  = cellSize * 0.4f;
+
+  sf::Color col;
+  switch (robotColor) {
+    case Color::Red:    col = sf::Color::Red;    break;
+    case Color::Green:  col = sf::Color::Green;  break;
+    case Color::Blue:   col = sf::Color::Blue;   break;
+    case Color::Yellow: col = sf::Color::Yellow; break;
+  }
+
+  // anel de destaque em volta do robot
+  sf::CircleShape ring(r + 6.f);
+  ring.setFillColor(sf::Color::Transparent);
+  ring.setOutlineThickness(5.f);
+  ring.setOutlineColor(sf::Color(col.r, col.g, col.b, 220));
+  ring.setPosition({cx - r - 6.f, cy - r - 6.f});
+  window.draw(ring);
+
+  // seta (triângulo) a apontar na direção
+  float fdx = (float)dx, fdy = (float)dy;
+  float baseDist = r + 6.f;
+  float tipDist  = r + 32.f;
+  float hw = 14.f;
+  // perpendicular a (fdx, fdy) -> (-fdy, fdx)
+  float px = -fdy, py = fdx;
+
+  sf::ConvexShape arrow;
+  arrow.setPointCount(3);
+  arrow.setFillColor(col);
+  arrow.setPoint(0, {cx + fdx * tipDist,             cy + fdy * tipDist});
+  arrow.setPoint(1, {cx + fdx * baseDist + px * hw,  cy + fdy * baseDist + py * hw});
+  arrow.setPoint(2, {cx + fdx * baseDist - px * hw,  cy + fdy * baseDist - py * hw});
+  window.draw(arrow);
+}
+
+// best solution banner
+
+void drawBestSolutionBanner(sf::RenderWindow &window, float boardCx, float bannerY, float boardW) {
+  sf::RectangleShape bar({boardW, 50.f});
+  bar.setPosition({boardCx - boardW / 2.f, bannerY});
+  bar.setFillColor(sf::Color(20, 20, 20));
+  window.draw(bar);
+
+  drawPixelTextCentered(window, "BEST SOLUTION - AI", boardCx, bannerY + 25.f, 4.f, sf::Color(210, 100, 20));
+}
+
+// click logic
 
 Screen handleMenuClick(Screen current, float cx, float cy, float winW, float winH) {
   if (current == Screen::MENU) {
