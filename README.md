@@ -2,11 +2,11 @@
 
 Ricochet Robots is a board game by Alex Randolph. The goal of the game is to place one of the robots in its corresponding target (of the same color), in the fewest steps possible. The trick is that once a robot starts moving, it won't stop until it hits a wall or another robot. The player(s) have to find the sequence of moves, using the multiple robots, to reach the goal in the fewest steps possible. This is a digital recreation of the game, in which you will be facing a bot always capable of finding the most optimal solution! 
 
-<img width="1201" height="1006" alt="image" src="https://github.com/user-attachments/assets/b4c18bad-55ca-4f33-ba86-a11fef75f2ec" />
+![](assets/ricochetRobots.png)
 
 ## Installation
 
-Clone this repository, and then use the provided Makefile to build the project:
+Clone this repository (or download the zip file), and then use the provided Makefile to build the project:
 
 ```
 git clone https://github.com/CamilaSilva-UP/RicochetRobotsSolver.git RicochetRobots
@@ -32,7 +32,7 @@ You can access the How to Play screen from the main menu of the game! But here a
   - If you didn't do any moves, it will display the optimal solution
   - If you already did some moves, it will display the optimal solution **from the current position**, and then display the most optimal solution from the beginning
 
-![ricochet](https://github.com/user-attachments/assets/29c1957f-ef83-46a9-8b48-c702c61d5395)
+![](assets/RicochetPreview.png)
 
 Have fun!
 
@@ -40,7 +40,7 @@ Have fun!
 
 ### Benchmarking 
 
-The program comes with a simple bechmarking program, to test the times between a BFS implementation and a A* implementation for the AI bot. 
+The program comes with a simple benchmarking program, to test the times between a BFS implementation and a A* implementation for the AI bot. 
 
 First, compile it using:
 
