@@ -8,7 +8,7 @@ Ricochet Robots is a board game by Alex Randolph. The goal of the game is to pla
 
 ### Dependencies
 
-This project depends on the SFML library for its graphical interface. 
+This project depends on the SFML 3.0 library for its graphical interface. 
 
 **Linux - Debian based distros**
 ```
@@ -28,6 +28,16 @@ brew install sfml
 More detailed installation instructions can be found in SFML's official website:
 
 https://www.sfml-dev.org/tutorials/3.1/#getting-started
+
+
+**IMPORTANT:** if the version available on your package manager is below 3.0, you will have to install the library manually
+
+From the SFML website: "Download the SDK from the download page, unpack it and copy the files to your preferred location: either a separate path in your personal folder (like /home/me/sfml), or a standard path (like /usr/local).
+If you already had an older version of SFML installed, make sure that it won't conflict with the new version!"
+
+The latest SDK can be found here:
+https://www.sfml-dev.org/download/
+
 
 ### Building and Executing
 
